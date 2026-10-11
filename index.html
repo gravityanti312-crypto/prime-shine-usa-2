@@ -2652,28 +2652,29 @@
   }
 </style>
 <style>
-  /* ── Prime Shine USA brand layer: logo navy + window blue + sun gold, with the logo's red on the main calls to action ── */
-  :root { --ps-red: #cc2020; --ps-red-dark: #a51818; --ps-navy: #0d3159; --ps-navy-2: #1e3164; --ps-gold: #fac544; }
+  /* ── Prime Shine USA brand layer: logo navy + window blue, with the logo's SUN GOLD for every main action.
+     Gold = "yes / go" (warm, optimistic, the brightest thing on a navy site). Red is only for errors and ✕ marks. ── */
+  :root { --ps-navy: #0d3159; --ps-navy-2: #1e3164; --ps-ink: #0c2340; --ps-blue: #1e5fa8; --ps-gold: #fac544;
+          --ps-cta: linear-gradient(180deg, #ffd45f 0%, #f7b62b 100%); --ps-cta-hover: linear-gradient(180deg, #ffdc7a 0%, #f4aa17 100%);
+          --ps-cta-shadow: 0 8px 22px rgba(232,169,19,0.38), inset 0 -2px 0 rgba(0,0,0,0.08); }
 
   /* Hero: "Life" in sun gold */
   .hero-h1 .accent { color: var(--ps-gold); }
 
-  /* Red "Get My Free Quote" buttons */
-  .btn-cyan, #hero .hero-buttons .btn-cyan { background: linear-gradient(135deg, var(--ps-red-dark) 0%, var(--ps-red) 100%); box-shadow: 0 6px 20px rgba(204,32,32,0.35); }
-  .btn-cyan:hover { background: linear-gradient(135deg, #8f1414 0%, var(--ps-red-dark) 100%); box-shadow: 0 8px 26px rgba(204,32,32,0.45); }
-  .nav-book { background: linear-gradient(135deg, var(--ps-red-dark), var(--ps-red)); box-shadow: 0 4px 16px rgba(204,32,32,0.3); }
-  .nav-book:hover { box-shadow: 0 6px 22px rgba(204,32,32,0.45); }
-  #mobile-menu .mobile-book { background: var(--ps-red); }
-  #mobile-menu .mobile-book:hover { background: var(--ps-red-dark); }
-  .dc-cta { background: var(--ps-red); }
-  .dc-cta:hover { background: var(--ps-red-dark); box-shadow: 0 10px 28px rgba(204,32,32,0.32); }
-  .footer-cta-btn:not(.footer-cta-btn--gold) { background: var(--ps-red); }
-  .footer-cta-btn:not(.footer-cta-btn--gold):hover { background: var(--ps-red-dark); }
-  #mobile-sticky.ms-call .sticky-call { background: linear-gradient(135deg, var(--ps-red-dark) 0%, var(--ps-red) 100%); box-shadow: 0 10px 24px rgba(204,32,32,0.35); }
+  /* Main actions: gold buttons, navy text */
+  .btn-cyan, #hero .hero-buttons .btn-cyan, .nav-book, #mobile-menu .mobile-book, .dc-cta, .footer-cta-btn:not(.footer-cta-btn--gold),
+  #mobile-sticky.ms-call .sticky-call, .rm-submit {
+    background: var(--ps-cta); color: var(--ps-ink); box-shadow: var(--ps-cta-shadow); }
+  .btn-cyan:hover, .nav-book:hover, #mobile-menu .mobile-book:hover, .dc-cta:hover, .footer-cta-btn:not(.footer-cta-btn--gold):hover,
+  #mobile-sticky.ms-call .sticky-call:hover, .rm-submit:hover {
+    background: var(--ps-cta-hover); color: var(--ps-ink); box-shadow: 0 12px 28px rgba(232,169,19,0.48), inset 0 -2px 0 rgba(0,0,0,0.08); }
+  .nav-book:hover { opacity: 1; }
 
-  /* Quote builder buttons use the banner's navy → red sweep */
-  .tq-next { color: #ffffff; background: linear-gradient(135deg, var(--ps-navy-2) 0%, var(--ps-red) 100%); box-shadow: 0 0 0 4px rgba(204,32,32,0.12); }
-  .tq-next:hover { background: linear-gradient(135deg, #162448 0%, var(--ps-red-dark) 100%); }
+  /* Secondary actions: navy / white, so the gold one is always the obvious choice */
+  #deepclean .dc-cta-row .dc-cta { background: var(--ps-navy); color: #ffffff; box-shadow: 0 8px 20px rgba(12,35,64,0.2); }
+  #deepclean .dc-cta-row .dc-cta:hover { background: var(--ps-blue); color: #ffffff; }
+  .footer-cta-btn--gold { background: #ffffff; color: var(--ps-ink); }
+  .footer-cta-btn--gold:hover { background: #eaf2fa; color: var(--ps-ink); }
 
   /* Nav logo: the Prime Shine banner is 900×275, so size it by height */
   #nav .nav-logo img { height: 70px; width: auto; }
@@ -2693,8 +2694,8 @@
   .bc-card { display: flex; flex-direction: column; }
   .bc-body { display: flex; flex-direction: column; flex: 1 1 auto; }
   .bc-quote { align-self: flex-start; margin-top: auto; padding: 14px 0 2px; background: none; border: 0; cursor: pointer;
-    font: 800 15.5px 'Inter', system-ui, sans-serif; color: var(--ps-red); }
-  .bc-quote:hover { color: var(--ps-red-dark); text-decoration: underline; }
+    font: 800 15.5px 'Inter', system-ui, sans-serif; color: var(--ps-blue); }
+  .bc-quote:hover { color: var(--ps-navy); text-decoration: underline; }
 
   /* Footer "Contact Us" column: an old #contact section rule was painting it white with 100px padding */
   #footer #contact { padding: 0; background: none; }
@@ -2715,7 +2716,7 @@
   @keyframes psq-fade { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
 
   .psq-head { display: flex; align-items: center; gap: 16px; padding: 14px 18px 14px 16px; color: #fff;
-    background: linear-gradient(100deg, #0c2552 0%, #24234b 38%, #6c1e38 72%, #b61926 100%); }
+    background: linear-gradient(100deg, #0a1d36 0%, #0d3159 55%, #1e5fa8 100%); }
   .psq-head-logo { height: 56px; width: auto; border-radius: 10px; display: block; flex: 0 0 auto; }
   .psq-head-mid { flex: 1; min-width: 0; text-align: center; }
   .psq-head-kicker { font-size: 13px; font-weight: 800; letter-spacing: .16em; text-transform: uppercase; color: #fac544; }
@@ -2732,14 +2733,14 @@
   .psq-stepper button { display: flex; align-items: center; gap: 9px; background: none; border: 0; padding: 4px; font-family: inherit; cursor: default; }
   .psq-stepper li.is-done button { cursor: pointer; }
   .psq-dot { width: 36px; height: 36px; border-radius: 50%; display: grid; place-items: center; font-size: 15px; font-weight: 900; background: #eef3f9; color: #7a8aa0; border: 2px solid #dfe7f1; transition: .2s; }
-  .is-current .psq-dot { background: linear-gradient(135deg, #1e3164, #cc2020); color: #fff; border-color: transparent; box-shadow: 0 4px 14px rgba(204,32,32,0.32); transform: scale(1.08); }
+  .is-current .psq-dot { background: #0d3159; color: #fff; border-color: transparent; box-shadow: 0 4px 14px rgba(13,49,89,0.3); transform: scale(1.08); }
   .is-done .psq-dot { background: #fac544; border-color: #fac544; color: #0c2340; }
   .psq-lbl { font-size: 15px; font-weight: 800; color: #7a8aa0; white-space: nowrap; }
   @media (max-width: 1500px) { .psq-stepper.is-long li:not(.is-current) .psq-lbl { display: none; } }
   .is-current .psq-lbl { color: #0c2340; font-weight: 900; }
   .is-done .psq-lbl { color: #0c2340; }
   .psq-bar { display: none; height: 6px; background: #e3eaf3; }
-  .psq-bar i { display: block; height: 100%; width: 14%; background: linear-gradient(90deg, #fac544, #cc2020); transition: width .3s ease; }
+  .psq-bar i { display: block; height: 100%; width: 14%; background: linear-gradient(90deg, #fac544, #e8a913); transition: width .3s ease; }
 
   .psq-body { flex: 1; min-height: 0; display: grid; grid-template-columns: minmax(0, 1fr) 360px; }
   .psq-col { display: flex; flex-direction: column; min-width: 0; min-height: 0; }
@@ -2876,8 +2877,8 @@
   .psq-back:hover { color: #1e5fa8; }
   .psq-back.is-hidden { visibility: hidden; }
   .psq-next { display: inline-flex; align-items: center; gap: 12px; border: 0; cursor: pointer; font: 900 19px 'Inter', system-ui, sans-serif; letter-spacing: .04em; text-transform: uppercase;
-    color: #fff; background: linear-gradient(135deg, #1e3164 0%, #cc2020 100%); padding: 19px 48px; border-radius: 999px; box-shadow: 0 12px 30px rgba(204,32,32,0.32); transition: transform .15s, box-shadow .15s; }
-  .psq-next:hover { transform: translateY(-2px); box-shadow: 0 16px 36px rgba(204,32,32,0.42); }
+    color: #0c2340; background: linear-gradient(180deg, #ffd45f 0%, #f7b62b 100%); padding: 19px 48px; border-radius: 999px; box-shadow: 0 10px 26px rgba(232,169,19,0.4), inset 0 -2px 0 rgba(0,0,0,0.08); transition: transform .15s, box-shadow .15s; }
+  .psq-next:hover { transform: translateY(-2px); background: linear-gradient(180deg, #ffdc7a 0%, #f4aa17 100%); box-shadow: 0 14px 32px rgba(232,169,19,0.5), inset 0 -2px 0 rgba(0,0,0,0.08); }
   .psq-next[disabled] { opacity: .65; cursor: wait; transform: none; }
 
   .psq-sum { background: linear-gradient(165deg, #1e5fa8 0%, #0d3159 50%, #0c2340 100%); color: #fff; border-radius: 24px; padding: 22px 20px; box-shadow: 0 16px 36px rgba(12,35,64,0.22); }
@@ -2897,7 +2898,7 @@
   .psq-howto li > span { flex: 0 0 30px; height: 30px; border-radius: 50%; background: #fac544; color: #0c2340; font-weight: 900; font-size: 14px; display: grid; place-items: center; }
   .psq-howto strong { display: block; color: #0c2340; font-size: 16.5px; }
   .psq-side-call { display: flex; align-items: center; gap: 14px; padding: 18px 20px; border-radius: 20px; background: #fff8e6; border: 1px solid #f6dc9b; color: #0c2340; text-decoration: none; font-size: 15px; font-weight: 700; }
-  .psq-side-call svg { color: #cc2020; flex: 0 0 auto; width: 26px; height: 26px; }
+  .psq-side-call svg { color: #1e5fa8; flex: 0 0 auto; width: 26px; height: 26px; }
   .psq-side-call strong { display: block; font-size: 21px; font-weight: 900; }
 
   .psq-done { text-align: center; max-width: 720px; margin: 0 auto; padding-bottom: 34px; }
@@ -3391,7 +3392,7 @@
   <rect width="64" height="64" rx="16" fill="#e8eef8"/>
   <path d="M32 12L14 20V34C14 43 22 50 32 52C42 50 50 43 50 34V20L32 12Z" fill="#0d3159" opacity="0.2"/>
   <path d="M32 12L14 20V34C14 43 22 50 32 52C42 50 50 43 50 34V20L32 12Z" stroke="#0d3159" stroke-width="2.5" stroke-linejoin="round" fill="none"/>
-  <path d="M23 32L29 38L41 26" stroke="#cc2020" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M23 32L29 38L41 26" stroke="#1e5fa8" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
 </svg></div>
           <h3>100% Satisfaction Guaranteed</h3>
           <p>If you&rsquo;re not happy, we come back and make it right. Every time. That&rsquo;s the Prime Shine promise.</p>
