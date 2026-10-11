@@ -2700,6 +2700,255 @@
   .tq-tip summary:hover { text-decoration: underline; }
   .tq-tip p { margin-top: 6px; line-height: 1.55; }
 </style>
+<style>
+  /* ── Quote builder: one question per screen, picture cards in the site's look. Never shows a price. ── */
+  #psq { position: fixed; inset: 0; z-index: 3000; }
+  #psq[hidden] { display: none; }
+  .psq-overlay { position: absolute; inset: 0; background: rgba(6,18,36,0.74); -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); }
+  .psq-dialog {
+    position: relative; display: flex; flex-direction: column; width: min(1200px, calc(100vw - 40px));
+    height: min(900px, calc(100vh - 40px)); height: min(900px, calc(100dvh - 40px)); margin: 20px auto;
+    background: #f4f7fb; border-radius: 28px; overflow: hidden; box-shadow: 0 40px 120px rgba(0,0,0,0.5);
+    animation: psq-pop .32s cubic-bezier(.2,.9,.3,1.15);
+  }
+  @keyframes psq-pop { from { opacity: 0; transform: translateY(18px) scale(.98); } to { opacity: 1; transform: none; } }
+  @keyframes psq-fade { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+
+  .psq-head { display: flex; align-items: center; gap: 14px; padding: 12px 16px 12px 14px; color: #fff;
+    background: linear-gradient(100deg, #0c2552 0%, #24234b 38%, #6c1e38 72%, #b61926 100%); }
+  .psq-head-logo { height: 46px; width: auto; border-radius: 9px; display: block; flex: 0 0 auto; }
+  .psq-head-mid { flex: 1; min-width: 0; text-align: center; }
+  .psq-head-kicker { font-size: 11px; font-weight: 800; letter-spacing: .16em; text-transform: uppercase; color: #fac544; }
+  .psq-head-title { font-size: 15px; font-weight: 800; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .psq-head-google { display: inline-flex; align-items: center; gap: 6px; background: #fff; color: #0c2340; border-radius: 999px; padding: 7px 12px; font-size: 13px; font-weight: 800; text-decoration: none; white-space: nowrap; }
+  .psq-head-google span { color: #f5b301; letter-spacing: 1px; }
+  .psq-close { flex: 0 0 40px; width: 40px; height: 40px; border-radius: 50%; border: 0; background: rgba(255,255,255,0.14); color: #fff; font-size: 26px; line-height: 1; cursor: pointer; }
+  .psq-close:hover { background: rgba(255,255,255,0.28); }
+
+  .psq-stepper { display: flex; justify-content: center; align-items: center; gap: 6px; list-style: none; margin: 0; padding: 12px 16px; background: #fff; border-bottom: 1px solid #e3eaf3; }
+  .psq-stepper li { display: flex; align-items: center; gap: 6px; }
+  .psq-stepper li + li::before { content: ""; width: 30px; height: 3px; border-radius: 3px; background: #dfe7f1; }
+  .psq-stepper li.is-done::before, .psq-stepper li.is-current::before { background: #fac544; }
+  .psq-stepper button { display: flex; align-items: center; gap: 7px; background: none; border: 0; padding: 4px; font-family: inherit; cursor: default; }
+  .psq-stepper li.is-done button { cursor: pointer; }
+  .psq-dot { width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center; font-size: 13px; font-weight: 900; background: #eef3f9; color: #7a8aa0; border: 2px solid #dfe7f1; transition: .2s; }
+  .is-current .psq-dot { background: linear-gradient(135deg, #1e3164, #cc2020); color: #fff; border-color: transparent; box-shadow: 0 4px 12px rgba(204,32,32,0.3); }
+  .is-done .psq-dot { background: #fac544; border-color: #fac544; color: #0c2340; }
+  .psq-lbl { font-size: 12.5px; font-weight: 800; color: #7a8aa0; }
+  .is-current .psq-lbl, .is-done .psq-lbl { color: #0c2340; }
+  .psq-bar { display: none; height: 5px; background: #e3eaf3; }
+  .psq-bar i { display: block; height: 100%; width: 14%; background: linear-gradient(90deg, #fac544, #cc2020); transition: width .3s ease; }
+
+  .psq-body { flex: 1; min-height: 0; display: grid; grid-template-columns: minmax(0, 1fr) 320px; }
+  .psq-main { position: relative; overflow-y: auto; padding: 28px 40px 0; display: flex; flex-direction: column; overscroll-behavior: contain; }
+  .psq-main > form { flex: 1 0 auto; }
+  .psq-side { overflow-y: auto; background: #fff; border-left: 1px solid #e3eaf3; padding: 24px 20px; display: flex; flex-direction: column; gap: 16px; }
+
+  .psq-step { display: none; }
+  .psq-step.is-active { display: block; animation: psq-fade .3s ease; }
+  .psq-step-head { margin-bottom: 20px; }
+  .psq-step-head .section-label { margin-bottom: 0.7rem; }
+  .psq-h { font-size: clamp(1.7rem, 2.6vw, 2.4rem); font-weight: 900; color: #0c2340; letter-spacing: -0.02em; line-height: 1.12; outline: none; }
+  .psq-sub { color: #4a5a70; font-size: 1.02rem; margin-top: 0.45rem; line-height: 1.55; max-width: 44rem; }
+  .psq-group { margin-top: 24px; }
+  .psq-group-label { font-size: 13px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; color: #1e5fa8; margin-bottom: 12px; }
+  .psq-group-label span { text-transform: none; letter-spacing: 0; color: #7a8aa0; font-weight: 600; }
+
+  .psq-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 14px; }
+  .psq-grid--3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .psq-grid--4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .psq-grid--5 { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+  .psq-grid--3x { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+
+  .psq-card { position: relative; display: flex; flex-direction: column; align-items: stretch; gap: 5px; padding: 7px 7px 14px; background: #fff; border: 2px solid #dfe7f1; border-radius: 20px;
+    cursor: pointer; font-family: inherit; text-align: center; color: #0c2340; transition: transform .18s, box-shadow .18s, border-color .18s; }
+  .psq-card:hover { transform: translateY(-3px); border-color: #a9c6e6; box-shadow: 0 14px 30px rgba(12,35,64,0.12); }
+  .psq-card:focus-visible, .psq-wide:focus-visible, .psq-chip:focus-visible { outline: 3px solid #fac544; outline-offset: 2px; }
+  .psq-card.is-on { border-color: #0d3159; box-shadow: 0 0 0 4px rgba(250,197,68,0.65), 0 14px 30px rgba(12,35,64,0.16); }
+  .psq-pic { display: block; border-radius: 14px; overflow: hidden; aspect-ratio: 10 / 7; background: #eaf2fa; }
+  .psq-pic { position: relative; }
+  .psq-pic .media-frame { display: block; border-radius: 14px; }
+  .psq-pic .media-slot { padding: 10px; gap: 6px; border-radius: 14px; }
+  .psq-pic .media-slot-icon { width: 36px; height: 36px; box-shadow: 0 4px 10px rgba(30,95,168,0.25); }
+  .psq-pic .media-slot-title { font-size: 0.66rem; letter-spacing: .06em; line-height: 1.25; }
+  .psq-card--featured .psq-pic .media-slot { background: repeating-linear-gradient(135deg, rgba(255,255,255,0.12) 0 14px, rgba(255,255,255,0.06) 14px 28px); border-color: rgba(255,255,255,0.45); color: #fff; }
+  .psq-card--featured .psq-pic .media-slot-icon { background: #fac544; color: #0c2340; }
+  .psq-card--featured .psq-pic { background: rgba(255,255,255,0.06); }
+  .psq-grid--3x .psq-pic { aspect-ratio: 16 / 9; }
+  .psq-card-title { font-size: 15px; font-weight: 800; line-height: 1.25; margin-top: 5px; padding: 0 4px; }
+  .psq-card-sub { font-size: 12.5px; color: #6b7686; line-height: 1.35; padding: 0 4px; }
+  .psq-check { position: absolute; top: 12px; right: 12px; z-index: 1; width: 28px; height: 28px; border-radius: 50%; background: rgba(255,255,255,0.95);
+    border: 2px solid #cfdbe9; display: grid; place-items: center; color: transparent; transition: .18s; }
+  .psq-check svg { width: 14px; height: 14px; }
+  .is-on > .psq-check { background: #fac544; border-color: #0d3159; color: #0c2340; transform: scale(1.08); }
+  .psq-tag { position: absolute; top: 12px; left: 12px; z-index: 1; background: #fac544; color: #0c2340; font-size: 10.5px; font-weight: 900; letter-spacing: .08em; text-transform: uppercase; padding: 4px 9px; border-radius: 999px; }
+
+  .psq-card--svc { text-align: left; padding-bottom: 16px; }
+  .psq-card--svc .psq-pic { aspect-ratio: 8 / 5; }
+  .psq-card--svc .psq-card-title { font-size: 18px; padding: 0 8px; }
+  .psq-card--svc .psq-card-sub { padding: 0 8px; }
+  .psq-incl { list-style: none; display: flex; flex-direction: column; gap: 5px; padding: 8px 8px 0; margin: 0; font-size: 13px; font-weight: 600; text-align: left; }
+  .psq-incl li { display: flex; gap: 7px; align-items: flex-start; line-height: 1.35; }
+  .psq-incl li::before { content: "\2713"; color: #1e5fa8; font-weight: 900; flex: 0 0 auto; }
+  .psq-incl li.b { font-weight: 800; }
+  .psq-incl li.b::before { content: "\2605"; color: #e8a913; }
+  .psq-incl li.no { color: #9aa6b6; text-decoration: line-through; }
+  .psq-incl li.no::before { content: "\2715"; color: #cc2020; }
+  .psq-card--featured { background: linear-gradient(165deg, #1e5fa8 0%, #0d3159 55%, #0c2340 100%); border-color: #0d3159; color: #fff; }
+  .psq-card--featured .psq-card-sub, .psq-card--featured .psq-incl li { color: rgba(255,255,255,0.88); }
+  .psq-card--featured .psq-incl li::before { color: #fac544; }
+  .psq-card--featured .psq-incl li.no { color: rgba(255,255,255,0.45); }
+  .psq-card--featured.is-on { box-shadow: 0 0 0 4px #fac544, 0 18px 40px rgba(12,35,64,0.3); }
+
+  .psq-plan { text-align: left; padding: 20px 18px 18px; gap: 6px; }
+  .psq-plan .psq-tag { position: static; align-self: flex-start; margin-bottom: 2px; }
+  .psq-plan-name { font-size: 18px; font-weight: 900; }
+  .psq-plan-off { font-size: 36px; font-weight: 900; color: #1e5fa8; line-height: 1; letter-spacing: -0.02em; }
+  .psq-plan-per { font-size: 11px; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; color: #6b7686; }
+  .psq-plan .psq-incl { padding: 10px 0 0; border-top: 1px dashed #dfe7f1; margin-top: 6px; }
+  .psq-card--featured .psq-plan-off { color: #fac544; }
+  .psq-card--featured .psq-plan-per { color: rgba(255,255,255,0.7); }
+  .psq-card--featured.psq-plan .psq-incl { border-top-color: rgba(255,255,255,0.18); }
+
+  .psq-wide { display: flex; align-items: center; gap: 14px; width: 100%; margin-top: 12px; padding: 12px 16px; background: #fff; border: 2px dashed #c6d4e4; border-radius: 16px;
+    cursor: pointer; font-family: inherit; text-align: left; color: #0c2340; transition: .18s; }
+  .psq-wide:hover { border-color: #1e5fa8; background: #f8fbff; }
+  .psq-wide.is-on { border-style: solid; border-color: #0d3159; box-shadow: 0 0 0 4px rgba(250,197,68,0.65); }
+  .psq-wide-ico { flex: 0 0 42px; height: 42px; border-radius: 12px; background: #eaf2fa; display: grid; place-items: center; color: #0d3159; font-weight: 900; }
+  .psq-wide strong { display: block; font-size: 15px; font-weight: 800; }
+  .psq-wide > span > span { font-size: 13px; color: #6b7686; }
+  .psq-wide .psq-check { position: static; margin-left: auto; flex: 0 0 28px; }
+
+  .psq-estimate { display: none; margin-top: 14px; align-items: center; gap: 14px; padding: 14px 18px; border-radius: 16px; background: linear-gradient(120deg, #0d3159, #1e3164); color: #fff; font-size: 15px; line-height: 1.45; }
+  .psq-estimate.show { display: flex; animation: psq-fade .3s ease; }
+  .psq-estimate b { color: #fac544; }
+  .psq-estimate-ico { flex: 0 0 36px; height: 36px; border-radius: 10px; background: rgba(255,255,255,0.1); display: grid; place-items: center; }
+  .psq-estimate-ico svg { width: 22px; height: 22px; }
+
+  .psq-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .psq-fields .full { grid-column: 1 / -1; }
+  .psq-field { position: relative; }
+  .psq-ico { position: absolute; left: 16px; top: 50%; transform: translateY(-50%); width: 20px; height: 20px; color: #7a8aa0; pointer-events: none; }
+  .psq-field input, .psq-field select { width: 100%; height: 56px; border: 2px solid #dfe7f1; border-radius: 14px; background-color: #fff; padding: 0 16px 0 46px;
+    font: 600 16px 'Inter', system-ui, sans-serif; color: #0c2340; outline: none; transition: border-color .15s, box-shadow .15s; -webkit-appearance: none; appearance: none; }
+  .psq-field.no-ico input { padding-left: 18px; }
+  .psq-field select { padding-right: 40px; cursor: pointer;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%230d3159' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat: no-repeat; background-position: right 16px center; }
+  .psq-field select.is-empty, .psq-field input::placeholder { color: #8a96a8; font-weight: 500; }
+  .psq-field input:focus, .psq-field select:focus { border-color: #1e5fa8; box-shadow: 0 0 0 4px rgba(30,95,168,0.14); }
+  .psq-field.is-invalid input, .psq-field.is-invalid select { border-color: #cc2020; box-shadow: 0 0 0 4px rgba(204,32,32,0.1); }
+  .psq-trust { display: flex; flex-wrap: wrap; gap: 8px 18px; margin-top: 16px; font-size: 13.5px; font-weight: 700; color: #0c2340; }
+  .psq-trust span::before { content: "\2713"; color: #1e5fa8; margin-right: 6px; font-weight: 900; }
+  .psq-consent { margin-top: 16px; }
+  .psq-checkline { display: flex; gap: 10px; align-items: flex-start; font-size: 14px; font-weight: 600; color: #0c2340; cursor: pointer; }
+  .psq-checkline input { width: 18px; height: 18px; margin-top: 2px; accent-color: #0d3159; flex: 0 0 auto; }
+  .psq-fine { font-size: 11.5px; color: #7a8aa0; line-height: 1.5; margin-top: 8px; }
+  .psq-fine a { color: #1e5fa8; font-weight: 700; }
+
+  .psq-chips { display: flex; flex-wrap: wrap; gap: 10px; }
+  .psq-chip { padding: 11px 18px; border-radius: 999px; border: 2px solid #dfe7f1; background: #fff; font: 800 14px 'Inter', system-ui, sans-serif; color: #0c2340; cursor: pointer; transition: .15s; }
+  .psq-chip:hover { border-color: #a9c6e6; }
+  .psq-chip.is-on { background: #0d3159; border-color: #0d3159; color: #fff; }
+
+  .psq-review { background: #fff; border: 1px solid #dfe7f1; border-radius: 20px; padding: 4px 18px; }
+  .psq-review-row { display: flex; gap: 12px; align-items: baseline; padding: 11px 0; border-bottom: 1px solid #eef2f7; }
+  .psq-review-row:last-child { border-bottom: 0; }
+  .psq-review-k { flex: 0 0 130px; font-size: 11.5px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: #7a8aa0; }
+  .psq-review-v { flex: 1; font-weight: 700; color: #0c2340; font-size: 14.5px; }
+  .psq-review-v.is-empty { color: #9aa6b6; font-weight: 600; }
+  .psq-edit { background: none; border: 0; color: #1e5fa8; font: 800 13px 'Inter', system-ui, sans-serif; cursor: pointer; text-decoration: underline; padding: 4px; }
+
+  .psq-err { color: #cc2020; font-weight: 700; font-size: 14.5px; margin-top: 14px; }
+  .psq-err:empty { display: none; }
+  .psq-actions { position: sticky; bottom: 0; z-index: 5; display: flex; align-items: center; justify-content: space-between; gap: 14px; padding: 18px 0 22px; margin-top: 10px;
+    background: linear-gradient(180deg, rgba(244,247,251,0) 0%, #f4f7fb 34%); }
+  .psq-actions.is-hidden { display: none; }
+  .psq-back { background: none; border: 0; font: 800 15px 'Inter', system-ui, sans-serif; color: #0c2340; cursor: pointer; padding: 12px 6px; }
+  .psq-back:hover { color: #1e5fa8; }
+  .psq-back.is-hidden { visibility: hidden; }
+  .psq-next { display: inline-flex; align-items: center; gap: 10px; border: 0; cursor: pointer; font: 900 16px 'Inter', system-ui, sans-serif; letter-spacing: .04em; text-transform: uppercase;
+    color: #fff; background: linear-gradient(135deg, #1e3164 0%, #cc2020 100%); padding: 16px 34px; border-radius: 999px; box-shadow: 0 10px 26px rgba(204,32,32,0.3); transition: transform .15s, box-shadow .15s; }
+  .psq-next:hover { transform: translateY(-2px); box-shadow: 0 14px 32px rgba(204,32,32,0.4); }
+  .psq-next[disabled] { opacity: .65; cursor: wait; transform: none; }
+
+  .psq-sum { background: linear-gradient(165deg, #1e5fa8 0%, #0d3159 50%, #0c2340 100%); color: #fff; border-radius: 22px; padding: 18px; box-shadow: 0 16px 36px rgba(12,35,64,0.22); }
+  .psq-sum-head { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+  .psq-sum-head img { width: 42px; height: 42px; border-radius: 10px; display: block; }
+  .psq-sum-title { font-weight: 900; font-size: 16px; }
+  .psq-sum-sub { font-size: 12px; color: rgba(255,255,255,0.7); }
+  .psq-sum-row { display: flex; justify-content: space-between; gap: 10px; padding: 8px 0; border-top: 1px solid rgba(255,255,255,0.12); font-size: 13px; }
+  .psq-sum-k { color: rgba(255,255,255,0.65); font-weight: 700; flex: 0 0 auto; }
+  .psq-sum-v { font-weight: 800; text-align: right; }
+  .psq-sum-v.is-empty { color: rgba(255,255,255,0.35); }
+  .psq-sum-v.gold { color: #fac544; }
+  .psq-howto { background: #f4f7fb; border: 1px solid #e3eaf3; border-radius: 18px; padding: 16px; }
+  .psq-howto-title { font-size: 12px; font-weight: 900; letter-spacing: .12em; text-transform: uppercase; color: #1e5fa8; margin-bottom: 10px; }
+  .psq-howto ol { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+  .psq-howto li { display: flex; gap: 10px; font-size: 13px; color: #4a5a70; line-height: 1.4; }
+  .psq-howto li > span { flex: 0 0 24px; height: 24px; border-radius: 50%; background: #fac544; color: #0c2340; font-weight: 900; font-size: 12px; display: grid; place-items: center; }
+  .psq-howto strong { display: block; color: #0c2340; font-size: 13.5px; }
+  .psq-side-call { display: flex; align-items: center; gap: 12px; padding: 14px 16px; border-radius: 18px; background: #fff8e6; border: 1px solid #f6dc9b; color: #0c2340; text-decoration: none; font-size: 13px; font-weight: 700; }
+  .psq-side-call svg { color: #cc2020; flex: 0 0 auto; }
+  .psq-side-call strong { display: block; font-size: 17px; font-weight: 900; }
+
+  .psq-done { text-align: center; max-width: 640px; margin: 0 auto; padding-bottom: 30px; }
+  .psq-done-icon { width: 84px; height: 84px; margin: 6px auto 16px; border-radius: 50%; background: #fac544; color: #0c2340; display: grid; place-items: center;
+    box-shadow: 0 0 0 10px rgba(250,197,68,0.22), 0 14px 30px rgba(12,35,64,0.16); }
+  .psq-done-icon svg { width: 40px; height: 40px; }
+  .psq-done-msg { font-size: 16.5px; color: #2a3a52; line-height: 1.6; margin-top: 10px; }
+  .psq-done-msg strong { color: #0c2340; }
+  .psq-callout { margin-top: 14px; background: #fff; border: 1px solid #dfe7f1; border-radius: 14px; padding: 12px 16px; font-weight: 700; color: #0c2340; font-size: 14.5px; }
+  .psq-callout a { color: #1e5fa8; }
+  .psq-done .tq-photo-box { margin-top: 14px; }
+  .psq-done-actions { margin-top: 22px; }
+
+  @media (max-width: 1080px) {
+    .psq-body { grid-template-columns: minmax(0, 1fr); }
+    .psq-side { display: none; }
+    .psq-lbl { display: none; }
+    .psq-stepper li + li::before { width: 22px; }
+  }
+  @media (max-width: 860px) {
+    .psq-grid--4 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .psq-grid--5 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  }
+  @media (max-width: 760px) {
+    .psq-dialog { width: 100%; height: 100%; height: 100dvh; margin: 0; border-radius: 0; animation: psq-fade .25s ease; }
+    .psq-head { padding: 9px 10px 9px 12px; gap: 10px; }
+    .psq-head-logo { height: 38px; }
+    .psq-head-google { display: none; }
+    .psq-head-mid { text-align: left; }
+    .psq-head-title { font-size: 14px; }
+    .psq-stepper { display: none; }
+    .psq-bar { display: block; }
+    .psq-main { padding: 20px 16px 0; }
+    .psq-h { font-size: 1.65rem; }
+    .psq-sub { font-size: 0.95rem; }
+    .psq-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+    .psq-grid--3 { grid-template-columns: 1fr; gap: 12px; }
+    .psq-card { border-radius: 16px; padding: 6px 6px 11px; }
+    .psq-card-title { font-size: 13.5px; }
+    .psq-card-sub { font-size: 11.5px; }
+    .psq-check { width: 24px; height: 24px; top: 9px; right: 9px; }
+    .psq-tag { top: 9px; left: 9px; }
+    .psq-card--svc { display: grid; grid-template-columns: 38% minmax(0, 1fr); align-content: center; column-gap: 12px; row-gap: 3px; padding: 8px 40px 8px 8px; }
+    .psq-card--svc .psq-pic { grid-column: 1; grid-row: 1 / span 3; aspect-ratio: 4 / 3; }
+    .psq-card--svc > .psq-tag, .psq-card--svc .psq-card-title, .psq-card--svc .psq-card-sub { grid-column: 2; padding: 0; }
+    .psq-card--svc > .psq-tag { position: static; justify-self: start; align-self: end; }
+    .psq-card--svc .psq-card-title { font-size: 16px; margin-top: 0; align-self: end; }
+    .psq-card--svc .psq-card-sub { align-self: start; }
+    .psq-card--svc .psq-incl { display: none; }
+    .psq-pic .media-slot-title { font-size: 0.6rem; }
+    .psq-plan { padding: 16px; }
+    .psq-plan-off { font-size: 30px; }
+    .psq-fields { grid-template-columns: 1fr; gap: 12px; }
+    .psq-review-k { flex-basis: 96px; }
+    .psq-actions { padding: 14px 0 calc(16px + env(safe-area-inset-bottom)); }
+    .psq-next { padding: 15px 26px; font-size: 15px; }
+    .psq-wide { padding: 11px 12px; }
+  }
+</style>
 </head>
 <body>
 
@@ -3557,357 +3806,306 @@
 </div>
 
 <!-- ─── QUOTE BUILDER ───────────────────────────────────────────────── -->
-<div id="quote-modal" role="dialog" aria-modal="true" aria-labelledby="tq-h-1">
-  <div class="tq-overlay" onclick="closeQuoteModal()"></div>
-  <div class="tq-wrap">
-    <div class="tq-head">
-      <img class="tq-logo" src="logo-square.png" alt="Prime Shine USA — Exterior Experts" />
-      <a class="tq-google" href="https://www.google.com/search?q=Prime+Shine+USA+Window+Washing+Phoenix" target="_blank" rel="noopener"><span>★★★★★</span> 5.0 on Google</a>
-      <button type="button" class="tq-close" onclick="closeQuoteModal()" aria-label="Close">&#215;</button>
+<div id="psq" role="dialog" aria-modal="true" aria-label="Free quote" hidden>
+  <div class="psq-overlay" onclick="closeQuoteModal()"></div>
+  <div class="psq-dialog">
+    <div class="psq-head">
+      <img class="psq-head-logo" src="logo-wide.png" alt="Prime Shine USA — Exterior Experts" />
+      <div class="psq-head-mid"><div class="psq-head-kicker" id="psq-kicker">Step 1 of 7</div><div class="psq-head-title" id="psq-title">Your free quote</div></div>
+      <a class="psq-head-google" href="https://www.google.com/search?q=Prime+Shine+USA+Window+Washing+Phoenix" target="_blank" rel="noopener"><span>&#9733;&#9733;&#9733;&#9733;&#9733;</span> 5.0 on Google</a>
+      <button type="button" class="psq-close" onclick="closeQuoteModal()" aria-label="Close">&#215;</button>
     </div>
-    <div class="tq-progress"><div class="tq-progress-fill" id="tq-progress"></div></div>
-
-    <form class="tq-body" id="tq-form" novalidate onsubmit="return false;">
-      <div class="tq-hp" aria-hidden="true"><label>Leave this empty <input type="text" name="_honey" id="tq-honey" tabindex="-1" autocomplete="off" /></label></div>
-
-      <!-- Step 1: Let's get to know you (a "call now" email goes out as soon as this is valid) -->
-      <div class="tq-step is-active" data-step="1">
-        <div class="tq-backspace"></div>
-        <h2 class="tq-h" id="tq-h-1">Let&rsquo;s get to know you!</h2>
-        <div class="tq-grid">
-          <div class="tq-field has-ico"><svg class="tq-ico" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="12" cy="7.5" r="4.5"/><path d="M3 21c0-5 4-8 9-8s9 3 9 8z"/></svg><input id="tq-first" type="text" placeholder="First name" aria-label="First name" autocomplete="given-name"/></div>
-          <div class="tq-field has-ico"><svg class="tq-ico" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="12" cy="7.5" r="4.5"/><path d="M3 21c0-5 4-8 9-8s9 3 9 8z"/></svg><input id="tq-last" type="text" placeholder="Last name" aria-label="Last name" autocomplete="family-name"/></div>
-          <div class="tq-field has-ico full"><svg class="tq-ico" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M2 5h20v14H2z"/><path d="M2 5l10 8 10-8" fill="none" stroke="#fff" stroke-width="2"/></svg><input id="tq-email" type="email" placeholder="Email" aria-label="Email" autocomplete="email"/></div>
-          <div class="tq-field has-ico full"><svg class="tq-ico" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6.6 10.8a15.1 15.1 0 0 0 6.6 6.6l2.2-2.2a1 1 0 0 1 1-.25 11.4 11.4 0 0 0 3.6.57 1 1 0 0 1 1 1V20a1 1 0 0 1-1 1A17 17 0 0 1 3 4a1 1 0 0 1 1-1h3.5a1 1 0 0 1 1 1c0 1.25.2 2.45.57 3.6a1 1 0 0 1-.25 1z"/></svg><input id="tq-phone" type="tel" placeholder="Mobile phone" aria-label="Mobile phone" inputmode="tel" autocomplete="tel"/></div>
-          <div class="tq-field has-ico full"><svg class="tq-ico" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M3 10v4a1 1 0 0 0 1 1h2l5 4V5L6 9H4a1 1 0 0 0-1 1zM14 8.5v7a4 4 0 0 0 0-7zM17 4.5v2a6 6 0 0 1 0 11v2a8 8 0 0 0 0-15z"/></svg><select id="tq-hear" class="is-empty" aria-label="How you heard about us" onchange="this.classList.toggle('is-empty', !this.value)">
-            <option value="">How you heard about us</option><option>Google search</option><option>Google Maps / reviews</option><option>Instagram</option><option>Facebook</option><option>Nextdoor</option><option>Friend or neighbor</option><option>Saw the truck</option><option>Returning customer</option><option>Other</option>
-          </select></div>
-          <div class="tq-field has-ico full"><svg class="tq-ico" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M2 7a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v3a2 2 0 0 0 0 4v3a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2v-3a2 2 0 0 0 0-4z"/><rect x="7" y="9" width="10" height="6" rx="1" fill="#fff"/></svg><input id="tq-code" type="text" placeholder="Promo or referral code (optional)" aria-label="Promo or referral code (optional)" autocomplete="off"/></div>
-        </div>
-        <div class="tq-consent">
-          <label class="tq-check"><input type="checkbox" id="tq-texts" /> <span>I agree to receive marketing text messages from Prime Shine USA about promotions, seasonal offers, and special deals.</span></label>
-          <p class="tq-fine">By checking this box, you agree to receive marketing texts from Prime Shine USA at the number provided (about 2&ndash;4 per month). Not required to book. Msg &amp; data rates may apply. Reply STOP to opt out, HELP for help. By tapping Next, you agree Prime Shine USA may call or text you about your quote. See our <a href="privacy.html" target="_blank" rel="noopener">Privacy Policy</a> and <a href="terms.html" target="_blank" rel="noopener">Terms</a>.</p>
-        </div>
-        <div class="tq-err" id="tq-err-1" role="alert"></div>
-        <div class="tq-next-row"><button type="button" class="tq-next" onclick="tqNext1()">Next &rarr;</button></div>
-      </div>
-
-      <!-- Step 2: What services? -->
-      <div class="tq-step" data-step="2">
-        <button type="button" class="tq-backlink" onclick="tqGo(1)">&larr; Back</button>
-        <h2 class="tq-h">What services?</h2>
-        <div class="tq-group-label">Pick your window cleaning</div>
-        <div class="tq-cards">
-          <button type="button" class="tq-card" data-group="service" data-value="Exterior Only" onclick="tqPick(this)"><svg class="tq-card-ico" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M8 30L32 10l24 20"/><path d="M14 25v31h36V25"/><rect x="22" y="32" width="20" height="16" rx="1.5"/><path d="M32 32v16M22 40h20"/><path d="M52 8v8M48 12h8"/></svg><span class="tq-card-title">Exterior only</span><span class="tq-card-sub">Every outside window, frames &amp; sills</span></button>
-          <button type="button" class="tq-card" data-group="service" data-value="Inside &amp; Out" onclick="tqPick(this)"><span class="tq-card-tag">Most popular</span><svg class="tq-card-ico" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="14" y="8" width="36" height="48" rx="3"/><path d="M32 8v48M14 32h36"/><path d="M20 15l5 5M37 39l6 6"/></svg><span class="tq-card-title">Inside &amp; out</span><span class="tq-card-sub">Both sides of every window + screens</span></button>
-          <button type="button" class="tq-card" data-group="service" data-value="Full Detail" onclick="tqPick(this)"><svg class="tq-card-ico" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M28 14l3.6 10.4L42 28l-10.4 3.6L28 42l-3.6-10.4L14 28l10.4-3.6z"/><path d="M46 36l1.8 5.2L53 43l-5.2 1.8L46 50l-1.8-5.2L39 43l5.2-1.8zM48 8v8M44 12h8"/></svg><span class="tq-card-title">Full detail</span><span class="tq-card-sub">Inside &amp; out + tracks &amp; hard water removal</span></button>
-        </div>
-        <div class="tq-group-label">Add-ons <span>(optional &mdash; pick any)</span></div>
-        <div class="tq-cards addons">
-          <button type="button" class="tq-card" data-group="addons" data-value="Solar panel cleaning" onclick="tqPick(this)"><svg class="tq-card-ico" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 50l8-28h36l-8 28z"/><path d="M16 36h36M26 22l-6 28M38 22l-6 28M50 22l-6 28"/><circle cx="14" cy="13" r="5"/><path d="M14 4v2M5 13h2M7.5 6.5l1.4 1.4"/></svg><span class="tq-card-title">Solar panel cleaning</span></button>
-          <button type="button" class="tq-card" data-group="addons" data-value="Pressure washing" onclick="tqPick(this)"><svg class="tq-card-ico" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M10 26h18l4 6h-8v14h-8V32h-6z"/><path d="M32 29h8"/><path d="M44 22l12-6M44 29h14M44 36l12 6"/><path d="M8 56h48"/></svg><span class="tq-card-title">Pressure washing</span></button>
-          <button type="button" class="tq-card" data-group="addons" data-value="Gutter cleaning" onclick="tqPick(this)"><svg class="tq-card-ico" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6 16h52v8a4 4 0 01-4 4H10a4 4 0 01-4-4z"/><path d="M46 28v22a4 4 0 004 4h6"/><path d="M18 40c0-4 4-7 4-7s4 3 4 7a4 4 0 01-8 0z"/></svg><span class="tq-card-title">Gutter cleaning</span></button>
-          <button type="button" class="tq-card" data-group="addons" data-value="Soft washing" onclick="tqPick(this)"><svg class="tq-card-ico" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M8 30L32 10l24 20"/><path d="M14 25v31h36V25"/><path d="M24 40c4-4 12-4 16 0M24 48c4-4 12-4 16 0"/></svg><span class="tq-card-title">Soft washing</span></button>
-          <button type="button" class="tq-card" data-group="addons" data-value="Hard water removal" onclick="tqPick(this)"><svg class="tq-card-ico" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M32 8c-7 9.5-16 19.5-16 30.5a16 16 0 0032 0C48 27.5 39 17.5 32 8z"/><path d="M25 39l5 5 10-10"/></svg><span class="tq-card-title">Hard water removal</span></button>
-          <button type="button" class="tq-card" data-group="addons" data-value="Holiday light installation" onclick="tqPick(this)"><svg class="tq-card-ico" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 14c10 8 18 10 28 10s18-2 28-10"/><path d="M14 20v5M26 23v5M38 23v5M50 20v5"/><path d="M14 25c-3 3-3 8 0 10 3-2 3-7 0-10zM26 28c-3 3-3 8 0 10 3-2 3-7 0-10zM38 28c-3 3-3 8 0 10 3-2 3-7 0-10zM50 25c-3 3-3 8 0 10 3-2 3-7 0-10z"/></svg><span class="tq-card-title">Holiday lights</span></button>
-        </div>
-        <div class="tq-err" id="tq-err-2" role="alert"></div>
-        <div class="tq-next-row"><button type="button" class="tq-next" onclick="tqNext2()">Next &rarr;</button></div>
-      </div>
-
-      <!-- Step 3: Pick your frequency -->
-      <div class="tq-step" data-step="3">
-        <button type="button" class="tq-backlink" onclick="tqGo(2)">&larr; Back</button>
-        <h2 class="tq-h">Pick your frequency</h2>
-        <div class="tq-cards tq-freq">
-          <button type="button" class="tq-card" data-group="frequency" data-value="Monthly" onclick="tqPick(this)"><span class="tq-card-tag tq-card-tag--gold">Best value</span><svg class="tq-card-ico" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="10" y="14" width="44" height="42" rx="6"/><path d="M10 26h44"/><path d="M21 8v10M43 8v10"/><text x="32" y="47" text-anchor="middle" font-size="15" font-weight="800" fill="currentColor" stroke="none" font-family="Inter,Arial,sans-serif">1 mo</text></svg><span class="tq-card-title">Monthly</span><span class="tq-freq-amt">$150 off</span><span class="tq-freq-per">Per cleaning</span><span class="tq-perks"><span class="tq-perk">12 cleanings a year</span><span class="tq-perk">We schedule every visit</span><span class="tq-perk tq-perk--bonus">Shine Guard Pro Tech</span><span class="tq-perk tq-perk--bonus">7-Day Rain Guarantee</span><span class="tq-perk tq-perk--bonus">Hard water removal</span></span></button>
-          <button type="button" class="tq-card" data-group="frequency" data-value="Quarterly" onclick="tqPick(this)"><span class="tq-card-tag">Every season</span><svg class="tq-card-ico" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="10" y="14" width="44" height="42" rx="6"/><path d="M10 26h44"/><path d="M21 8v10M43 8v10"/><text x="32" y="47" text-anchor="middle" font-size="15" font-weight="800" fill="currentColor" stroke="none" font-family="Inter,Arial,sans-serif">3 mo</text></svg><span class="tq-card-title">Quarterly</span><span class="tq-freq-amt">$100 off</span><span class="tq-freq-per">Per cleaning</span><span class="tq-perks"><span class="tq-perk">4 cleanings a year</span><span class="tq-perk">We schedule every visit</span><span class="tq-perk tq-perk--bonus">Shine Guard Pro Tech</span><span class="tq-perk tq-perk--bonus">7-Day Rain Guarantee</span><span class="tq-perk tq-perk--bonus">Hard water removal</span></span></button>
-          <button type="button" class="tq-card" data-group="frequency" data-value="Biannual" onclick="tqPick(this)"><span class="tq-card-tag">Twice a year</span><svg class="tq-card-ico" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="10" y="14" width="44" height="42" rx="6"/><path d="M10 26h44"/><path d="M21 8v10M43 8v10"/><text x="32" y="47" text-anchor="middle" font-size="15" font-weight="800" fill="currentColor" stroke="none" font-family="Inter,Arial,sans-serif">6 mo</text></svg><span class="tq-card-title">Biannual</span><span class="tq-freq-amt">$50 off</span><span class="tq-freq-per">Per cleaning</span><span class="tq-perks"><span class="tq-perk">2 cleanings a year</span><span class="tq-perk">We schedule every visit</span></span></button>
-        </div>
-        <button type="button" class="tq-onetime" data-group="frequency" data-value="One-time" onclick="tqPick(this)">
-          <span><strong>Just a one-time cleaning</strong><span>Full price &mdash; no discount or bonuses.</span></span><span aria-hidden="true">&rsaquo;</span>
-        </button>
-        <p class="tq-freq-fine">Membership savings apply to every cleaning on your plan. Your exact price is confirmed when we reach out.</p>
-        <div class="tq-err" id="tq-err-3" role="alert"></div>
-        <div class="tq-next-row"><button type="button" class="tq-next" onclick="tqNext3()">Next &rarr;</button></div>
-      </div>
-
-      <!-- Step 4: About your home + address -->
-      <div class="tq-step" data-step="4">
-        <button type="button" class="tq-backlink" onclick="tqGo(3)">&larr; Back</button>
-        <h2 class="tq-h">You&rsquo;re almost there!</h2>
-        <div class="tq-group-label">About your home</div>
-        <div class="tq-grid">
-          <div class="tq-field"><select id="tq-type" class="is-empty" aria-label="Property type" onchange="this.classList.toggle('is-empty', !this.value)">
-            <option value="">Property type</option><option>House</option><option>Townhome</option><option>Condo</option><option>Storefront</option><option>Commercial building</option>
-          </select></div>
-          <div class="tq-field"><select id="tq-size" class="is-empty" aria-label="Home size" onchange="this.classList.toggle('is-empty', !this.value)">
-            <option value="">Home size</option><option>Under 2,500 sq ft (about 0&ndash;20 panes)</option><option>2,500&ndash;3,499 sq ft (about 21&ndash;40 panes)</option><option>3,500&ndash;4,999 sq ft (about 41&ndash;60 panes)</option><option>5,000&ndash;6,499 sq ft (about 61&ndash;80 panes)</option><option>6,500&ndash;7,999 sq ft (about 81&ndash;99 panes)</option><option>8,000+ sq ft (100+ panes)</option><option>Not sure</option>
-          </select></div>
-          <div class="tq-field"><select id="tq-panes" class="is-empty" aria-label="French pane windows" onchange="this.classList.toggle('is-empty', !this.value)">
-            <option value="">French pane windows?</option><option>No French panes</option><option>Yes, less than 25%</option><option>Yes, about half</option><option>Yes, all of them</option><option>Not sure</option>
-          </select></div>
-          <div class="tq-field"><select id="tq-last-cleaned" class="is-empty" aria-label="Last professionally cleaned (optional)" onchange="this.classList.toggle('is-empty', !this.value)">
-            <option value="">Last cleaned? (optional)</option><option>Never</option><option>New construction (paint &amp; stucco residue)</option><option>Less than a year ago</option><option>1&ndash;2 years ago</option><option>3&ndash;5 years ago</option><option>Not sure</option>
-          </select></div>
-        </div>
-        <details class="tq-tip">
-          <summary>What are French pane windows?</summary>
-          <p>Windows split into many small panes by a grid. They take extra time to clean, so they affect your price.</p>
-        </details>
-        <div class="tq-group-label">Where&rsquo;s your home?</div>
-        <div class="tq-grid">
-          <div class="tq-field has-ico full"><svg class="tq-ico" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a7 7 0 0 0-7 7c0 5 7 13 7 13s7-8 7-13a7 7 0 0 0-7-7zm0 9.5A2.5 2.5 0 1 1 12 6.5a2.5 2.5 0 0 1 0 5z"/></svg><input id="tq-address" type="text" placeholder="Street address" aria-label="Street address" autocomplete="street-address"/></div>
-          <div class="tq-field"><input id="tq-city" type="text" placeholder="City" aria-label="City" autocomplete="address-level2"/></div>
-          <div class="tq-field"><input id="tq-zip" type="text" placeholder="Zip code" aria-label="Zip code" inputmode="numeric" autocomplete="postal-code" maxlength="5"/></div>
-        </div>
-        <div class="tq-err" id="tq-err-4" role="alert"></div>
-        <div class="tq-next-row"><button type="button" class="tq-next" id="tq-submit" onclick="tqSubmit()"><span id="tq-submit-label">Submit</span> &rarr;</button></div>
-      </div>
-
-      <!-- Done -->
-      <div class="tq-step" data-step="5">
-        <div class="tq-done">
-          <div class="tq-done-icon">&#10003;</div>
-          <h2 class="tq-h" id="tq-done-title">You&rsquo;re all set!</h2>
-          <p class="tq-done-msg" id="tq-done-msg">We&rsquo;re putting together your custom quote now.</p>
-          <div class="tq-callout">&#128222; Save our number so you know it&rsquo;s us: <a href="tel:6025589990">(602) 558-9990</a></div>
-          <div class="tq-photo-box">
-            <h3>Want a faster, more exact price?</h3>
-            <p>Add a few photos of your windows (optional).</p>
-            <div class="tq-photos"><label class="tq-photo" data-slot="0"><input type="file" accept="image/*" onchange="tqPhoto(this,0)" aria-label="Add photo: Front of your home" /><span class="tq-photo-plus"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1z"/><circle cx="12" cy="13" r="3.5"/></svg></span><span class="tq-photo-label">Front of your home</span><img alt="" hidden /><span class="tq-photo-tag" hidden>Front of your home</span><button type="button" class="tq-photo-x" onclick="tqPhotoRemove(event,0)" aria-label="Remove photo">&#215;</button></label><label class="tq-photo" data-slot="1"><input type="file" accept="image/*" onchange="tqPhoto(this,1)" aria-label="Add photo: Back of your home" /><span class="tq-photo-plus"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1z"/><circle cx="12" cy="13" r="3.5"/></svg></span><span class="tq-photo-label">Back of your home</span><img alt="" hidden /><span class="tq-photo-tag" hidden>Back of your home</span><button type="button" class="tq-photo-x" onclick="tqPhotoRemove(event,1)" aria-label="Remove photo">&#215;</button></label><label class="tq-photo" data-slot="2"><input type="file" accept="image/*" onchange="tqPhoto(this,2)" aria-label="Add photo: Close-up of a window" /><span class="tq-photo-plus"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1z"/><circle cx="12" cy="13" r="3.5"/></svg></span><span class="tq-photo-label">Close-up of a window</span><img alt="" hidden /><span class="tq-photo-tag" hidden>Close-up of a window</span><button type="button" class="tq-photo-x" onclick="tqPhotoRemove(event,2)" aria-label="Remove photo">&#215;</button></label><label class="tq-photo" data-slot="3"><input type="file" accept="image/*" onchange="tqPhoto(this,3)" aria-label="Add photo: Anything else" /><span class="tq-photo-plus"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1z"/><circle cx="12" cy="13" r="3.5"/></svg></span><span class="tq-photo-label">Anything else</span><img alt="" hidden /><span class="tq-photo-tag" hidden>Anything else</span><button type="button" class="tq-photo-x" onclick="tqPhotoRemove(event,3)" aria-label="Remove photo">&#215;</button></label></div>
-            <div class="tq-photo-help" id="tq-photo-help">Tap a box to take a photo or choose one from your phone.</div>
-            <button type="button" class="tq-photo-send" id="tq-photo-send" onclick="tqSendPhotos()" hidden>Send my photos</button>
-          </div>
-          <div class="tq-done-video" id="tq-done-video" hidden>
-            <h3>While you wait to hear from us</h3>
-            <p>See how Prime Shine memberships work.</p>
-            <div class="tq-done-video-frame"><div class="media-frame" data-type="video" data-mode="vsl" data-src=""><div class="media-slot"><span class="media-slot-icon"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="14" height="12" rx="2"/><path d="M16 10.5l6-3.5v10l-6-3.5z"/></svg></span><span class="media-slot-title">Membership video goes here</span><span class="media-slot-note">Same membership video as on the page.</span></div></div></div>
-          </div>
-          <div class="tq-callout">&#11088; See why neighbors rate us 5.0 &mdash; <a href="https://www.google.com/search?q=Prime+Shine+USA+Window+Washing+Phoenix" target="_blank" rel="noopener">read our Google reviews</a></div>
-          <div class="tq-next-row tq-done-btn"><button type="button" class="tq-next" onclick="closeQuoteModal()">Done</button></div>
+    <ol class="psq-stepper" id="psq-stepper"><li data-s="1"><button type="button" onclick="psqJump(1)" aria-label="Step 1: You"><span class="psq-dot">1</span><span class="psq-lbl">You</span></button></li><li data-s="2"><button type="button" onclick="psqJump(2)" aria-label="Step 2: Property"><span class="psq-dot">2</span><span class="psq-lbl">Property</span></button></li><li data-s="3"><button type="button" onclick="psqJump(3)" aria-label="Step 3: Size"><span class="psq-dot">3</span><span class="psq-lbl">Size</span></button></li><li data-s="4"><button type="button" onclick="psqJump(4)" aria-label="Step 4: Windows"><span class="psq-dot">4</span><span class="psq-lbl">Windows</span></button></li><li data-s="5"><button type="button" onclick="psqJump(5)" aria-label="Step 5: Services"><span class="psq-dot">5</span><span class="psq-lbl">Services</span></button></li><li data-s="6"><button type="button" onclick="psqJump(6)" aria-label="Step 6: Plan"><span class="psq-dot">6</span><span class="psq-lbl">Plan</span></button></li><li data-s="7"><button type="button" onclick="psqJump(7)" aria-label="Step 7: Address"><span class="psq-dot">7</span><span class="psq-lbl">Address</span></button></li></ol>
+    <div class="psq-bar" aria-hidden="true"><i id="psq-bar"></i></div>
+    <div class="psq-body">
+      <div class="psq-main" id="psq-main">
+        <form id="psq-form" novalidate onsubmit="return false;">
+          <div class="tq-hp" aria-hidden="true"><label>Leave this empty <input type="text" name="_honey" id="psq-honey" tabindex="-1" autocomplete="off" /></label></div>
+          <div class="psq-step is-active" data-step="1" role="group" aria-labelledby="psq-h-1"><div class="psq-step-head"><div class="section-label">Step 1 of 7 &middot; Free quote</div><h2 class="psq-h" id="psq-h-1" tabindex="-1">Let&rsquo;s get to know <span class="tc-hl">you</span></h2><p class="psq-sub">Takes about a minute. No prices to figure out &mdash; we&rsquo;ll call you with your exact quote.</p></div><div class="psq-fields"><div class="psq-field"><svg class="psq-ico" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="12" cy="7.5" r="4.5"/><path d="M3 21c0-5 4-8 9-8s9 3 9 8z"/></svg><input id="psq-first" type="text" placeholder="First name" aria-label="First name" autocomplete="given-name"/></div><div class="psq-field"><svg class="psq-ico" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="12" cy="7.5" r="4.5"/><path d="M3 21c0-5 4-8 9-8s9 3 9 8z"/></svg><input id="psq-last" type="text" placeholder="Last name" aria-label="Last name" autocomplete="family-name"/></div><div class="psq-field"><svg class="psq-ico" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6.6 10.8a15.1 15.1 0 0 0 6.6 6.6l2.2-2.2a1 1 0 0 1 1-.25 11.4 11.4 0 0 0 3.6.57 1 1 0 0 1 1 1V20a1 1 0 0 1-1 1A17 17 0 0 1 3 4a1 1 0 0 1 1-1h3.5a1 1 0 0 1 1 1c0 1.25.2 2.45.57 3.6a1 1 0 0 1-.25 1z"/></svg><input id="psq-phone" type="tel" placeholder="Mobile phone" aria-label="Mobile phone" inputmode="tel" autocomplete="tel"/></div><div class="psq-field"><svg class="psq-ico" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M2 5h20v14H2z"/><path d="M2 5l10 8 10-8" fill="none" stroke="#fff" stroke-width="2"/></svg><input id="psq-email" type="email" placeholder="Email (optional)" aria-label="Email (optional)" autocomplete="email"/></div><div class="psq-field"><svg class="psq-ico" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M3 10v4a1 1 0 0 0 1 1h2l5 4V5L6 9H4a1 1 0 0 0-1 1zM14 8.5v7a4 4 0 0 0 0-7zM17 4.5v2a6 6 0 0 1 0 11v2a8 8 0 0 0 0-15z"/></svg><select id="psq-hear" class="is-empty" aria-label="How you heard about us" onchange="this.classList.toggle('is-empty', !this.value)"><option value="">How you heard about us</option><option>Google search</option><option>Google Maps / reviews</option><option>Instagram</option><option>Facebook</option><option>Nextdoor</option><option>Friend or neighbor</option><option>Saw the truck</option><option>Returning customer</option><option>Other</option></select></div><div class="psq-field"><svg class="psq-ico" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M2 7a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v3a2 2 0 0 0 0 4v3a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2v-3a2 2 0 0 0 0-4z"/><rect x="7" y="9" width="10" height="6" rx="1" fill="#fff"/></svg><input id="psq-code" type="text" placeholder="Promo or referral code (optional)" aria-label="Promo or referral code (optional)" autocomplete="off"/></div></div><div class="psq-trust"><span>Free quote</span><span>No obligation</span><span>We call you with your price</span><span>100% satisfaction guarantee</span></div><div class="psq-consent"><label class="psq-checkline"><input type="checkbox" id="psq-texts" /> <span>I agree to receive marketing text messages from Prime Shine USA about promotions, seasonal offers, and special deals.</span></label><p class="psq-fine">By checking this box, you agree to receive marketing texts from Prime Shine USA at the number provided (about 2&ndash;4 per month). Not required to book. Msg &amp; data rates may apply. Reply STOP to opt out, HELP for help. By tapping Next, you agree Prime Shine USA may call or text you about your quote. See our <a href="privacy.html" target="_blank" rel="noopener">Privacy Policy</a> and <a href="terms.html" target="_blank" rel="noopener">Terms</a>.</p></div><div class="psq-err" id="psq-err-1" role="alert"></div></div><div class="psq-step" data-step="2" role="group" aria-labelledby="psq-h-2"><div class="psq-step-head"><div class="section-label">Step 2 of 7 &middot; Your property</div><h2 class="psq-h" id="psq-h-2" tabindex="-1">What kind of <span class="tc-hl">property</span>?</h2><p class="psq-sub">Pick the one that fits best.</p></div><div class="psq-grid psq-grid--5"><button type="button" class="psq-card " data-group="type" data-value="House" aria-pressed="false" onclick="psqPick(this)"><span class="psq-check" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span><span class="psq-pic"><span class="media-frame" data-type="image" data-src="" data-alt="House"><span class="media-slot"><span class="media-slot-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h3l2-3h6l2 3h3a1 1 0 011 1v10a1 1 0 01-1 1H4a1 1 0 01-1-1V9a1 1 0 011-1z"/><circle cx="12" cy="13.5" r="3.8"/></svg></span><span class="media-slot-title">House photo</span></span></span></span><span class="psq-card-title">House</span><span class="psq-card-sub">Single or multi-level home</span></button><button type="button" class="psq-card " data-group="type" data-value="Townhome" aria-pressed="false" onclick="psqPick(this)"><span class="psq-check" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span><span class="psq-pic"><span class="media-frame" data-type="image" data-src="" data-alt="Townhome"><span class="media-slot"><span class="media-slot-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h3l2-3h6l2 3h3a1 1 0 011 1v10a1 1 0 01-1 1H4a1 1 0 01-1-1V9a1 1 0 011-1z"/><circle cx="12" cy="13.5" r="3.8"/></svg></span><span class="media-slot-title">Townhome photo</span></span></span></span><span class="psq-card-title">Townhome</span><span class="psq-card-sub">Attached residential home</span></button><button type="button" class="psq-card " data-group="type" data-value="Condo" aria-pressed="false" onclick="psqPick(this)"><span class="psq-check" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span><span class="psq-pic"><span class="media-frame" data-type="image" data-src="" data-alt="Condo"><span class="media-slot"><span class="media-slot-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h3l2-3h6l2 3h3a1 1 0 011 1v10a1 1 0 01-1 1H4a1 1 0 01-1-1V9a1 1 0 011-1z"/><circle cx="12" cy="13.5" r="3.8"/></svg></span><span class="media-slot-title">Condo photo</span></span></span></span><span class="psq-card-title">Condo</span><span class="psq-card-sub">A unit in a shared building</span></button><button type="button" class="psq-card " data-group="type" data-value="Storefront" aria-pressed="false" onclick="psqPick(this)"><span class="psq-check" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span><span class="psq-pic"><span class="media-frame" data-type="image" data-src="" data-alt="Storefront"><span class="media-slot"><span class="media-slot-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h3l2-3h6l2 3h3a1 1 0 011 1v10a1 1 0 01-1 1H4a1 1 0 01-1-1V9a1 1 0 011-1z"/><circle cx="12" cy="13.5" r="3.8"/></svg></span><span class="media-slot-title">Storefront photo</span></span></span></span><span class="psq-card-title">Storefront</span><span class="psq-card-sub">Shop or restaurant</span></button><button type="button" class="psq-card " data-group="type" data-value="Commercial building" aria-pressed="false" onclick="psqPick(this)"><span class="psq-check" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span><span class="psq-pic"><span class="media-frame" data-type="image" data-src="" data-alt="Commercial building"><span class="media-slot"><span class="media-slot-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h3l2-3h6l2 3h3a1 1 0 011 1v10a1 1 0 01-1 1H4a1 1 0 01-1-1V9a1 1 0 011-1z"/><circle cx="12" cy="13.5" r="3.8"/></svg></span><span class="media-slot-title">Building photo</span></span></span></span><span class="psq-card-title">Commercial building</span><span class="psq-card-sub">Office or business building</span></button></div><div class="psq-err" id="psq-err-2" role="alert"></div></div><div class="psq-step" data-step="3" role="group" aria-labelledby="psq-h-3"><div class="psq-step-head"><div class="section-label">Step 3 of 7 &middot; Home size</div><h2 class="psq-h" id="psq-h-3" tabindex="-1">How big is the <span class="tc-hl">place</span>?</h2><p class="psq-sub">Just pick the closest &mdash; no measuring. We&rsquo;ll confirm everything on the call.</p></div><div class="psq-grid psq-grid--3x"><button type="button" class="psq-card " data-group="size" data-value="Under 2,500 sq ft" aria-pressed="false" onclick="psqPick(this)"><span class="psq-check" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span><span class="psq-pic"><span class="media-frame" data-type="image" data-src="" data-alt="Under 2,500 sq ft"><span class="media-slot"><span class="media-slot-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h3l2-3h6l2 3h3a1 1 0 011 1v10a1 1 0 01-1 1H4a1 1 0 01-1-1V9a1 1 0 011-1z"/><circle cx="12" cy="13.5" r="3.8"/></svg></span><span class="media-slot-title">Small home photo</span></span></span></span><span class="psq-card-title">Under 2,500 sq ft</span><span class="psq-card-sub">About 0–20 panes</span></button><button type="button" class="psq-card " data-group="size" data-value="2,500–3,499 sq ft" aria-pressed="false" onclick="psqPick(this)"><span class="psq-check" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span><span class="psq-pic"><span class="media-frame" data-type="image" data-src="" data-alt="2,500–3,499 sq ft"><span class="media-slot"><span class="media-slot-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h3l2-3h6l2 3h3a1 1 0 011 1v10a1 1 0 01-1 1H4a1 1 0 01-1-1V9a1 1 0 011-1z"/><circle cx="12" cy="13.5" r="3.8"/></svg></span><span class="media-slot-title">Mid-size home photo</span></span></span></span><span class="psq-card-title">2,500–3,499 sq ft</span><span class="psq-card-sub">About 21–40 panes</span></button><button type="button" class="psq-card " data-group="size" data-value="3,500–4,999 sq ft" aria-pressed="false" onclick="psqPick(this)"><span class="psq-check" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span><span class="psq-pic"><span class="media-frame" data-type="image" data-src="" data-alt="3,500–4,999 sq ft"><span class="media-slot"><span class="media-slot-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h3l2-3h6l2 3h3a1 1 0 011 1v10a1 1 0 01-1 1H4a1 1 0 01-1-1V9a1 1 0 011-1z"/><circle cx="12" cy="13.5" r="3.8"/></svg></span><span class="media-slot-title">Two-story home photo</span></span></span></span><span class="psq-card-title">3,500–4,999 sq ft</span><span class="psq-card-sub">About 41–60 panes</span></button><button type="button" class="psq-card " data-group="size" data-value="5,000–6,499 sq ft" aria-pressed="false" onclick="psqPick(this)"><span class="psq-check" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span><span class="psq-pic"><span class="media-frame" data-type="image" data-src="" data-alt="5,000–6,499 sq ft"><span class="media-slot"><span class="media-slot-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h3l2-3h6l2 3h3a1 1 0 011 1v10a1 1 0 01-1 1H4a1 1 0 01-1-1V9a1 1 0 011-1z"/><circle cx="12" cy="13.5" r="3.8"/></svg></span><span class="media-slot-title">Large home photo</span></span></span></span><span class="psq-card-title">5,000–6,499 sq ft</span><span class="psq-card-sub">About 61–80 panes</span></button><button type="button" class="psq-card " data-group="size" data-value="6,500–7,999 sq ft" aria-pressed="false" onclick="psqPick(this)"><span class="psq-check" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span><span class="psq-pic"><span class="media-frame" data-type="image" data-src="" data-alt="6,500–7,999 sq ft"><span class="media-slot"><span class="media-slot-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h3l2-3h6l2 3h3a1 1 0 011 1v10a1 1 0 01-1 1H4a1 1 0 01-1-1V9a1 1 0 011-1z"/><circle cx="12" cy="13.5" r="3.8"/></svg></span><span class="media-slot-title">Larger home photo</span></span></span></span><span class="psq-card-title">6,500–7,999 sq ft</span><span class="psq-card-sub">About 81–99 panes</span></button><button type="button" class="psq-card " data-group="size" data-value="8,000+ sq ft" aria-pressed="false" onclick="psqPick(this)"><span class="psq-check" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span><span class="psq-pic"><span class="media-frame" data-type="image" data-src="" data-alt="8,000+ sq ft"><span class="media-slot"><span class="media-slot-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h3l2-3h6l2 3h3a1 1 0 011 1v10a1 1 0 01-1 1H4a1 1 0 01-1-1V9a1 1 0 011-1z"/><circle cx="12" cy="13.5" r="3.8"/></svg></span><span class="media-slot-title">Estate home photo</span></span></span></span><span class="psq-card-title">8,000+ sq ft</span><span class="psq-card-sub">100+ panes</span></button></div><button type="button" class="psq-wide" data-group="size" data-value="Not sure" aria-pressed="false" onclick="psqPick(this)"><span class="psq-wide-ico" aria-hidden="true"><span style="font-size:22px">?</span></span><span><strong>Not sure</strong><span>No problem &mdash; we&rsquo;ll figure it out with you on the call.</span></span><span class="psq-check" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span></button><div class="psq-estimate" id="psq-estimate" role="status"><span class="psq-estimate-ico" aria-hidden="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2Q12 12 22 12Q12 12 12 22Q12 12 2 12Q12 12 12 2Z" fill="#fac544"/></svg></span><span id="psq-estimate-text"></span></div><div class="psq-err" id="psq-err-3" role="alert"></div></div><div class="psq-step" data-step="4" role="group" aria-labelledby="psq-h-4"><div class="psq-step-head"><div class="section-label">Step 4 of 7 &middot; Your windows</div><h2 class="psq-h" id="psq-h-4" tabindex="-1">Tell us about your <span class="tc-hl">windows</span></h2><p class="psq-sub">French pane windows have a grid that splits the glass into small panes &mdash; they take extra time.</p></div><div class="psq-group"><div class="psq-group-label">Do you have French pane windows?</div><div class="psq-grid psq-grid--4"><button type="button" class="psq-card " data-group="panes" data-value="No French panes" aria-pressed="false" onclick="psqPick(this)"><span class="psq-check" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span><span class="psq-pic"><span class="media-frame" data-type="image" data-src="" data-alt="No French panes"><span class="media-slot"><span class="media-slot-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h3l2-3h6l2 3h3a1 1 0 011 1v10a1 1 0 01-1 1H4a1 1 0 01-1-1V9a1 1 0 011-1z"/><circle cx="12" cy="13.5" r="3.8"/></svg></span><span class="media-slot-title">Plain window photo</span></span></span></span><span class="psq-card-title">No French panes</span><span class="psq-card-sub">Plain, open glass</span></button><button type="button" class="psq-card " data-group="panes" data-value="Yes, a few" aria-pressed="false" onclick="psqPick(this)"><span class="psq-check" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span><span class="psq-pic"><span class="media-frame" data-type="image" data-src="" data-alt="Yes, a few"><span class="media-slot"><span class="media-slot-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h3l2-3h6l2 3h3a1 1 0 011 1v10a1 1 0 01-1 1H4a1 1 0 01-1-1V9a1 1 0 011-1z"/><circle cx="12" cy="13.5" r="3.8"/></svg></span><span class="media-slot-title">French pane photo</span></span></span></span><span class="psq-card-title">Yes, a few</span><span class="psq-card-sub">Less than 25% of windows</span></button><button type="button" class="psq-card " data-group="panes" data-value="Yes, about half" aria-pressed="false" onclick="psqPick(this)"><span class="psq-check" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span><span class="psq-pic"><span class="media-frame" data-type="image" data-src="" data-alt="Yes, about half"><span class="media-slot"><span class="media-slot-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h3l2-3h6l2 3h3a1 1 0 011 1v10a1 1 0 01-1 1H4a1 1 0 01-1-1V9a1 1 0 011-1z"/><circle cx="12" cy="13.5" r="3.8"/></svg></span><span class="media-slot-title">French pane photo</span></span></span></span><span class="psq-card-title">Yes, about half</span><span class="psq-card-sub">Around 50% of windows</span></button><button type="button" class="psq-card " data-group="panes" data-value="Yes, all of them" aria-pressed="false" onclick="psqPick(this)"><span class="psq-check" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span><span class="psq-pic"><span class="media-frame" data-type="image" data-src="" data-alt="Yes, all of them"><span class="media-slot"><span class="media-slot-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h3l2-3h6l2 3h3a1 1 0 011 1v10a1 1 0 01-1 1H4a1 1 0 01-1-1V9a1 1 0 011-1z"/><circle cx="12" cy="13.5" r="3.8"/></svg></span><span class="media-slot-title">French pane photo</span></span></span></span><span class="psq-card-title">Yes, all of them</span><span class="psq-card-sub">Every window has a grid</span></button></div><button type="button" class="psq-wide" data-group="panes" data-value="Not sure" aria-pressed="false" onclick="psqPick(this)"><span class="psq-wide-ico" aria-hidden="true"><span style="font-size:22px">?</span></span><span><strong>Not sure</strong><span>We&rsquo;ll ask you a couple of quick questions on the call.</span></span><span class="psq-check" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span></button></div><div class="psq-group"><div class="psq-group-label">When were they last professionally cleaned? <span>(optional)</span></div><div class="psq-chips"><button type="button" class="psq-chip" data-group="last" data-value="Never" aria-pressed="false" onclick="psqPick(this)">Never</button><button type="button" class="psq-chip" data-group="last" data-value="New construction" aria-pressed="false" onclick="psqPick(this)">New construction</button><button type="button" class="psq-chip" data-group="last" data-value="Less than a year ago" aria-pressed="false" onclick="psqPick(this)">Less than a year ago</button><button type="button" class="psq-chip" data-group="last" data-value="1–2 years ago" aria-pressed="false" onclick="psqPick(this)">1–2 years ago</button><button type="button" class="psq-chip" data-group="last" data-value="3–5 years ago" aria-pressed="false" onclick="psqPick(this)">3–5 years ago</button><button type="button" class="psq-chip" data-group="last" data-value="Not sure" aria-pressed="false" onclick="psqPick(this)">Not sure</button></div></div><div class="psq-err" id="psq-err-4" role="alert"></div></div><div class="psq-step" data-step="5" role="group" aria-labelledby="psq-h-5"><div class="psq-step-head"><div class="section-label">Step 5 of 7 &middot; Services</div><h2 class="psq-h" id="psq-h-5" tabindex="-1">What should we <span class="tc-hl">clean</span>?</h2><p class="psq-sub">Pick a window cleaning, then add anything else you&rsquo;d like quoted.</p></div><div class="psq-grid psq-grid--3"><button type="button" class="psq-card psq-card--svc" data-group="service" data-value="Exterior Only" aria-pressed="false" onclick="psqPick(this)"><span class="psq-check" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span><span class="psq-pic"><span class="media-frame" data-type="image" data-src="" data-alt="Exterior Only"><span class="media-slot"><span class="media-slot-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h3l2-3h6l2 3h3a1 1 0 011 1v10a1 1 0 01-1 1H4a1 1 0 01-1-1V9a1 1 0 011-1z"/><circle cx="12" cy="13.5" r="3.8"/></svg></span><span class="media-slot-title">Exterior cleaning photo</span></span></span></span><span class="psq-card-title">Exterior Only</span><span class="psq-card-sub">Every outside window</span><ul class="psq-incl"><li>Outside glass</li><li>Frames &amp; sills</li><li class="no">Inside glass</li><li class="no">Screens &amp; tracks</li></ul></button><button type="button" class="psq-card psq-card--svc psq-card--featured" data-group="service" data-value="Inside &amp; Out" aria-pressed="false" onclick="psqPick(this)"><span class="psq-tag">Most popular</span><span class="psq-check" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span><span class="psq-pic"><span class="media-frame" data-type="image" data-src="" data-alt="Inside & Out"><span class="media-slot"><span class="media-slot-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h3l2-3h6l2 3h3a1 1 0 011 1v10a1 1 0 01-1 1H4a1 1 0 01-1-1V9a1 1 0 011-1z"/><circle cx="12" cy="13.5" r="3.8"/></svg></span><span class="media-slot-title">Inside &amp; out photo</span></span></span></span><span class="psq-card-title">Inside &amp; Out</span><span class="psq-card-sub">Both sides of every window</span><ul class="psq-incl"><li>Outside glass</li><li>Frames &amp; sills</li><li>Inside glass</li><li>Screens</li><li class="no">Tracks &amp; hard water</li></ul></button><button type="button" class="psq-card psq-card--svc" data-group="service" data-value="Full Detail" aria-pressed="false" onclick="psqPick(this)"><span class="psq-check" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span><span class="psq-pic"><span class="media-frame" data-type="image" data-src="" data-alt="Full Detail"><span class="media-slot"><span class="media-slot-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h3l2-3h6l2 3h3a1 1 0 011 1v10a1 1 0 01-1 1H4a1 1 0 01-1-1V9a1 1 0 011-1z"/><circle cx="12" cy="13.5" r="3.8"/></svg></span><span class="media-slot-title">Full detail photo</span></span></span></span><span class="psq-card-title">Full Detail</span><span class="psq-card-sub">The works, top to bottom</span><ul class="psq-incl"><li>Everything in Inside &amp; Out</li><li>Tracks detailed</li><li>Hard water spot removal</li></ul></button></div><button type="button" class="psq-wide" data-group="service" data-value="Not sure" aria-pressed="false" onclick="psqPick(this)"><span class="psq-wide-ico" aria-hidden="true"><span style="font-size:22px">?</span></span><span><strong>Not sure which one?</strong><span>We&rsquo;ll help you pick on the call.</span></span><span class="psq-check" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span></button><div class="psq-group"><div class="psq-group-label">Add-ons <span>(optional &mdash; pick any)</span></div><div class="psq-grid psq-grid--3x"><button type="button" class="psq-card psq-card--multi" data-group="addons" data-value="Solar panel cleaning" aria-pressed="false" onclick="psqPick(this)"><span class="psq-check" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span><span class="psq-pic"><span class="media-frame" data-type="image" data-src="" data-alt="Solar panel cleaning"><span class="media-slot"><span class="media-slot-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h3l2-3h6l2 3h3a1 1 0 011 1v10a1 1 0 01-1 1H4a1 1 0 01-1-1V9a1 1 0 011-1z"/><circle cx="12" cy="13.5" r="3.8"/></svg></span><span class="media-slot-title">Solar panel photo</span></span></span></span><span class="psq-card-title">Solar panel cleaning</span></button><button type="button" class="psq-card psq-card--multi" data-group="addons" data-value="Pressure washing" aria-pressed="false" onclick="psqPick(this)"><span class="psq-check" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span><span class="psq-pic"><span class="media-frame" data-type="image" data-src="" data-alt="Pressure washing"><span class="media-slot"><span class="media-slot-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h3l2-3h6l2 3h3a1 1 0 011 1v10a1 1 0 01-1 1H4a1 1 0 01-1-1V9a1 1 0 011-1z"/><circle cx="12" cy="13.5" r="3.8"/></svg></span><span class="media-slot-title">Pressure washing photo</span></span></span></span><span class="psq-card-title">Pressure washing</span></button><button type="button" class="psq-card psq-card--multi" data-group="addons" data-value="Gutter cleaning" aria-pressed="false" onclick="psqPick(this)"><span class="psq-check" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span><span class="psq-pic"><span class="media-frame" data-type="image" data-src="" data-alt="Gutter cleaning"><span class="media-slot"><span class="media-slot-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h3l2-3h6l2 3h3a1 1 0 011 1v10a1 1 0 01-1 1H4a1 1 0 01-1-1V9a1 1 0 011-1z"/><circle cx="12" cy="13.5" r="3.8"/></svg></span><span class="media-slot-title">Gutter photo</span></span></span></span><span class="psq-card-title">Gutter cleaning</span></button><button type="button" class="psq-card psq-card--multi" data-group="addons" data-value="Soft washing" aria-pressed="false" onclick="psqPick(this)"><span class="psq-check" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span><span class="psq-pic"><span class="media-frame" data-type="image" data-src="" data-alt="Soft washing"><span class="media-slot"><span class="media-slot-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h3l2-3h6l2 3h3a1 1 0 011 1v10a1 1 0 01-1 1H4a1 1 0 01-1-1V9a1 1 0 011-1z"/><circle cx="12" cy="13.5" r="3.8"/></svg></span><span class="media-slot-title">Soft washing photo</span></span></span></span><span class="psq-card-title">Soft washing</span></button><button type="button" class="psq-card psq-card--multi" data-group="addons" data-value="Hard water removal" aria-pressed="false" onclick="psqPick(this)"><span class="psq-check" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span><span class="psq-pic"><span class="media-frame" data-type="image" data-src="" data-alt="Hard water removal"><span class="media-slot"><span class="media-slot-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h3l2-3h6l2 3h3a1 1 0 011 1v10a1 1 0 01-1 1H4a1 1 0 01-1-1V9a1 1 0 011-1z"/><circle cx="12" cy="13.5" r="3.8"/></svg></span><span class="media-slot-title">Hard water photo</span></span></span></span><span class="psq-card-title">Hard water removal</span></button><button type="button" class="psq-card psq-card--multi" data-group="addons" data-value="Holiday lights" aria-pressed="false" onclick="psqPick(this)"><span class="psq-check" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span><span class="psq-pic"><span class="media-frame" data-type="image" data-src="" data-alt="Holiday lights"><span class="media-slot"><span class="media-slot-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h3l2-3h6l2 3h3a1 1 0 011 1v10a1 1 0 01-1 1H4a1 1 0 01-1-1V9a1 1 0 011-1z"/><circle cx="12" cy="13.5" r="3.8"/></svg></span><span class="media-slot-title">Holiday lights photo</span></span></span></span><span class="psq-card-title">Holiday lights</span></button></div></div><div class="psq-err" id="psq-err-5" role="alert"></div></div><div class="psq-step" data-step="6" role="group" aria-labelledby="psq-h-6"><div class="psq-step-head"><div class="section-label">Step 6 of 7 &middot; Membership</div><h2 class="psq-h" id="psq-h-6" tabindex="-1">Want to <span class="tc-hl">save</span> every visit?</h2><p class="psq-sub">Optional &mdash; members save on every cleaning. We&rsquo;ll go over it all on the call.</p></div><div class="psq-grid psq-grid--3"><button type="button" class="psq-card psq-plan psq-card--featured" data-group="plan" data-value="Monthly" aria-pressed="false" onclick="psqPick(this)"><span class="psq-tag">&#9733; Best value</span><span class="psq-check" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span><span class="psq-plan-name">Monthly</span><span class="psq-plan-off">$150 OFF</span><span class="psq-plan-per">Every cleaning</span><ul class="psq-incl"><li>12 cleanings a year</li><li>We schedule every visit</li><li class="b">Shine Guard Pro Tech</li><li class="b">7-Day Rain Guarantee</li><li class="b">Hard water removal</li></ul></button><button type="button" class="psq-card psq-plan" data-group="plan" data-value="Quarterly" aria-pressed="false" onclick="psqPick(this)"><span class="psq-check" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span><span class="psq-plan-name">Quarterly</span><span class="psq-plan-off">$100 OFF</span><span class="psq-plan-per">Every cleaning</span><ul class="psq-incl"><li>4 cleanings a year</li><li>We schedule every visit</li><li class="b">Shine Guard Pro Tech</li><li class="b">7-Day Rain Guarantee</li><li class="b">Hard water removal</li></ul></button><button type="button" class="psq-card psq-plan" data-group="plan" data-value="Biannual" aria-pressed="false" onclick="psqPick(this)"><span class="psq-check" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span><span class="psq-plan-name">Biannual</span><span class="psq-plan-off">$50 OFF</span><span class="psq-plan-per">Every cleaning</span><ul class="psq-incl"><li>2 cleanings a year</li><li>We schedule every visit</li><li class="no">Shine Guard Pro Tech</li><li class="no">7-Day Rain Guarantee</li><li class="no">Hard water removal</li></ul></button></div><button type="button" class="psq-wide" data-group="plan" data-value="Not sure yet" aria-pressed="false" onclick="psqPick(this)"><span class="psq-wide-ico" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.8 19.8 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.8 19.8 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72c.13.96.36 1.9.7 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.91.34 1.85.57 2.81.7A2 2 0 0122 16.92z"/></svg></span><span><strong>Not sure yet</strong><span>Tell me about memberships on the call.</span></span><span class="psq-check" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span></button><button type="button" class="psq-wide" data-group="plan" data-value="One-time" aria-pressed="false" onclick="psqPick(this)"><span class="psq-wide-ico" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/><path d="M12 13v5"/></svg></span><span><strong>Just a one-time cleaning</strong><span>No membership for now.</span></span><span class="psq-check" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span></button><div class="psq-err" id="psq-err-6" role="alert"></div></div><div class="psq-step" data-step="7" role="group" aria-labelledby="psq-h-7"><div class="psq-step-head"><div class="section-label">Step 7 of 7 &middot; Almost done</div><h2 class="psq-h" id="psq-h-7" tabindex="-1">Where should we <span class="tc-hl">come</span>?</h2><p class="psq-sub">Last step! We&rsquo;ll call you to go over your exact price.</p></div><div class="psq-fields"><div class="psq-field full"><svg class="psq-ico" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a7 7 0 0 0-7 7c0 5 7 13 7 13s7-8 7-13a7 7 0 0 0-7-7zm0 9.5A2.5 2.5 0 1 1 12 6.5a2.5 2.5 0 0 1 0 5z"/></svg><input id="psq-address" type="text" placeholder="Street address" aria-label="Street address" autocomplete="street-address"/></div><div class="psq-field no-ico"><input id="psq-city" type="text" placeholder="City" aria-label="City" autocomplete="address-level2"/></div><div class="psq-field no-ico"><input id="psq-zip" type="text" placeholder="Zip code" aria-label="Zip code" inputmode="numeric" autocomplete="postal-code" maxlength="5"/></div></div><div class="psq-group"><div class="psq-group-label">Best time to call you?</div><div class="psq-chips"><button type="button" class="psq-chip is-on" data-group="time" data-value="Anytime" aria-pressed="true" onclick="psqPick(this)">Anytime</button><button type="button" class="psq-chip" data-group="time" data-value="Morning" aria-pressed="false" onclick="psqPick(this)">Morning</button><button type="button" class="psq-chip" data-group="time" data-value="Afternoon" aria-pressed="false" onclick="psqPick(this)">Afternoon</button><button type="button" class="psq-chip" data-group="time" data-value="Evening" aria-pressed="false" onclick="psqPick(this)">Evening</button></div></div><div class="psq-group"><div class="psq-group-label">Your quote call details</div><div class="psq-review" id="psq-review"></div></div><div class="psq-err" id="psq-err-7" role="alert"></div></div><div class="psq-step" data-step="8" role="group" aria-labelledby="psq-done-title"><div class="psq-done"><div class="psq-done-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></div><h2 class="psq-h" id="psq-done-title" tabindex="-1">You&rsquo;re all set!</h2><p class="psq-done-msg" id="psq-done-msg">We&rsquo;ll call you soon with your exact price.</p><div class="psq-callout">&#128222; Save our number so you know it&rsquo;s us: <a href="tel:6025589990">(602) 558-9990</a></div><div class="tq-photo-box"><h3>Want a faster, more exact quote?</h3><p>Add a few photos of your windows (optional).</p><div class="tq-photos"><label class="tq-photo" data-slot="0"><input type="file" accept="image/*" onchange="psqPhoto(this,0)" aria-label="Add photo: Front of your home" /><span class="tq-photo-plus"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1z"/><circle cx="12" cy="13" r="3.5"/></svg></span><span class="tq-photo-label">Front of your home</span><img alt="" hidden /><span class="tq-photo-tag" hidden>Front of your home</span><button type="button" class="tq-photo-x" onclick="psqPhotoRemove(event,0)" aria-label="Remove photo">&#215;</button></label><label class="tq-photo" data-slot="1"><input type="file" accept="image/*" onchange="psqPhoto(this,1)" aria-label="Add photo: Back of your home" /><span class="tq-photo-plus"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1z"/><circle cx="12" cy="13" r="3.5"/></svg></span><span class="tq-photo-label">Back of your home</span><img alt="" hidden /><span class="tq-photo-tag" hidden>Back of your home</span><button type="button" class="tq-photo-x" onclick="psqPhotoRemove(event,1)" aria-label="Remove photo">&#215;</button></label><label class="tq-photo" data-slot="2"><input type="file" accept="image/*" onchange="psqPhoto(this,2)" aria-label="Add photo: Close-up of a window" /><span class="tq-photo-plus"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1z"/><circle cx="12" cy="13" r="3.5"/></svg></span><span class="tq-photo-label">Close-up of a window</span><img alt="" hidden /><span class="tq-photo-tag" hidden>Close-up of a window</span><button type="button" class="tq-photo-x" onclick="psqPhotoRemove(event,2)" aria-label="Remove photo">&#215;</button></label><label class="tq-photo" data-slot="3"><input type="file" accept="image/*" onchange="psqPhoto(this,3)" aria-label="Add photo: Anything else" /><span class="tq-photo-plus"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1z"/><circle cx="12" cy="13" r="3.5"/></svg></span><span class="tq-photo-label">Anything else</span><img alt="" hidden /><span class="tq-photo-tag" hidden>Anything else</span><button type="button" class="tq-photo-x" onclick="psqPhotoRemove(event,3)" aria-label="Remove photo">&#215;</button></label></div><div class="tq-photo-help" id="psq-photo-help">Tap a box to take a photo or choose one from your phone.</div><button type="button" class="tq-photo-send" id="psq-photo-send" onclick="psqSendPhotos()" hidden>Send my photos</button></div><div class="psq-callout">&#11088; See why neighbors rate us 5.0 &mdash; <a href="https://www.google.com/search?q=Prime+Shine+USA+Window+Washing+Phoenix" target="_blank" rel="noopener">read our Google reviews</a></div><div class="psq-done-actions"><button type="button" class="psq-next" onclick="closeQuoteModal()">Done</button></div></div></div>
+        </form>
+        <div class="psq-actions" id="psq-actions">
+          <button type="button" class="psq-back is-hidden" id="psq-back" onclick="psqBack()">&larr; Back</button>
+          <button type="button" class="psq-next" id="psq-next" onclick="psqNext()"><span id="psq-next-label">Next</span> &rarr;</button>
         </div>
       </div>
-    </form>
-    <iframe name="tq-sink" id="tq-sink" title="Photo upload" tabindex="-1" aria-hidden="true" style="display:none;"></iframe>
+      <aside class="psq-side" aria-label="Your quote so far"><div class="psq-sum"><div class="psq-sum-head"><img src="logo-square.png" alt="" /><div><div class="psq-sum-title">Your quote call</div><div class="psq-sum-sub">Fills in as you go</div></div></div><div id="psq-sum-rows"></div></div><div class="psq-howto"><div class="psq-howto-title">What happens next</div><ol><li><span>1</span><div><strong>Tell us about your home</strong>About a minute, right here.</div></li><li><span>2</span><div><strong>We call you</strong>With your exact price &mdash; and answer any questions.</div></li><li><span>3</span><div><strong>Your windows shine</strong>Streak-free, 100% guaranteed.</div></li></ol></div><a class="psq-side-call" href="tel:6025589990"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.8 19.8 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.8 19.8 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72c.13.96.36 1.9.7 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.91.34 1.85.57 2.81.7A2 2 0 0122 16.92z"/></svg><span>Rather talk now?<strong>(602) 558-9990</strong></span></a></aside>
+    </div>
+    <iframe name="psq-sink" id="psq-sink" title="Photo upload" tabindex="-1" aria-hidden="true" style="display:none;"></iframe>
   </div>
 </div>
 
 <!-- ─── JAVASCRIPT ─────────────────────────────────────────────────── -->
 <script>
-  /* ── Mobile Menu ─────────────────────────────────────────── */
-  function toggleMobile() {
-    document.getElementById('mobile-menu').classList.toggle('open');
-    document.body.style.overflow = document.getElementById('mobile-menu').classList.contains('open') ? 'hidden' : '';
-  }
-  function closeMobile() {
-    document.getElementById('mobile-menu').classList.remove('open');
-    document.body.style.overflow = '';
-  }
+  /* ── Quote builder: 7 quick picture steps, then Prime Shine calls with the price. No prices are ever shown here. ── */
+  var PSQ_EMAIL = 'primeshineusacare@gmail.com';
+  var PSQ_PHONE = '(602) 558-9990';
+  var PSQ_STEPS = 7, PSQ_DONE = 8;
+  var PSQ_TITLES = ['', 'Your free quote', 'Your property', 'Home size', 'Your windows', 'Services', 'Membership', 'Almost done', 'All set'];
+  var PSQ_PANES = { 'Under 2,500 sq ft': '0–20', '2,500–3,499 sq ft': '21–40', '3,500–4,999 sq ft': '41–60', '5,000–6,499 sq ft': '61–80', '6,500–7,999 sq ft': '81–99', '8,000+ sq ft': '100+' };
+  var PSQ_PLAN = { 'Monthly': 'Monthly — $150 off every cleaning', 'Quarterly': 'Quarterly — $100 off every cleaning', 'Biannual': 'Biannual — $50 off every cleaning',
+                   'Not sure yet': 'Not sure yet — go over memberships on the call', 'One-time': 'One-time cleaning' };
+  var PSQ_AUTO = { type: 2, plan: 6 };   // single-pick steps that move on by themselves
+  var PSQ_PHOTO_LABELS = ['Front of your home', 'Back of your home', 'Close-up of a window', 'Anything else'];
+  var psq = { step: 1, contact: null, startSentFor: '', picks: { addons: [], time: 'Anytime' }, photos: [null, null, null, null], photosSent: false };
 
-  /* ── Quote Builder: know you → services → frequency → home + address. No prices online; Prime Shine reaches out to every lead. ── */
-  var TQ_EMAIL = 'primeshineusacare@gmail.com';
-  var TQ_PHONE = '(602) 558-9990';
-  var TQ_STEPS = 4, TQ_DONE = 5;
-  var TQ_SAVINGS = { 'Monthly': '$150 off per cleaning', 'Quarterly': '$100 off per cleaning', 'Biannual': '$50 off per cleaning', 'One-time': 'One-time cleaning (no plan)' };
-  var TQ_PHOTO_LABELS = ['Front of your home', 'Back of your home', 'Close-up of a window', 'Anything else'];
-  var tq = { step: 1, picks: { addons: [] }, contact: null, startSentFor: '', photos: [null, null, null, null], photosSent: false };
+  function psqEl(id) { return document.getElementById(id); }
+  function psqVal(id) { return (psqEl(id).value || '').trim(); }
 
   function openQuoteModal(mode) {
-    if (tq.step === TQ_DONE) tqReset();
-    var names = { exterior: 'Exterior Only', insideout: 'Inside & Out', full: 'Full Detail' };
-    if (names[mode] && !tq.picks.service) {
-      var b = Array.prototype.filter.call(document.querySelectorAll('#tq-form .tq-card[data-group="service"]'), function (el) { return el.getAttribute('data-value') === names[mode]; })[0];
-      if (b) tqPick(b, true);
-    }
+    if (psq.step === PSQ_DONE) psqReset();
+    var services = { exterior: 'Exterior Only', insideout: 'Inside & Out', full: 'Full Detail' };
     var plans = { monthly: 'Monthly', quarterly: 'Quarterly', biannual: 'Biannual', onetime: 'One-time' };
-    if (plans[mode]) {
-      var pb = document.querySelector('#tq-form [data-group="frequency"][data-value="' + plans[mode] + '"]');
-      if (pb) tqPick(pb, true);
-    }
-    document.getElementById('quote-modal').classList.add('open');
+    if (services[mode]) psqSelect('service', services[mode]);
+    if (plans[mode]) psqSelect('plan', plans[mode]);
+    var m = psqEl('psq'); m.hidden = false;
     document.body.style.overflow = 'hidden';
-    tqGo(tq.step);
-    if (tq.step === 1) setTimeout(function () { var f = document.getElementById('tq-first'); if (f && window.innerWidth > 640) f.focus(); }, 60);
+    psqGo(psq.step, true);
+    if (psq.step === 1 && window.innerWidth > 760) setTimeout(function () { psqEl('psq-first').focus(); }, 80);
   }
 
   function closeQuoteModal() {
-    var m = document.getElementById('quote-modal');
-    if (!m || !m.classList.contains('open')) return;
-    m.classList.remove('open');
-    Array.prototype.forEach.call(m.querySelectorAll('video'), function (v) { v.pause(); });
+    var m = psqEl('psq');
+    if (!m || m.hidden) return;
+    m.hidden = true;
     document.body.style.overflow = '';
-    if (tq.step === TQ_DONE) tqReset();
+    if (psq.step === PSQ_DONE) psqReset();
   }
 
-  function tqReset() {
-    tq.photos.forEach(function (p, i) { if (p) tqPhotoRemove(null, i); });
-    tq.step = 1; tq.picks = { addons: [] }; tq.contact = null; tq.startSentFor = ''; tq.photosSent = false;
-    var form = document.getElementById('tq-form');
-    form.reset();
-    form.querySelectorAll('.is-on').forEach(function (b) { b.classList.remove('is-on'); });
-    form.querySelectorAll('.is-invalid').forEach(function (f) { f.classList.remove('is-invalid'); });
-    form.querySelectorAll('select').forEach(function (s) { s.classList.toggle('is-empty', !s.value); });
-    for (var i = 1; i <= TQ_STEPS; i++) tqErr(i, '');
-    var btn = document.getElementById('tq-submit'); btn.disabled = false; document.getElementById('tq-submit-label').textContent = 'Submit';
-    var ps = document.getElementById('tq-photo-send'); ps.hidden = true; ps.disabled = false; ps.textContent = 'Send my photos';
-    tqPhotoHelp();
+  function psqReset() {
+    psq.photos.forEach(function (p, i) { if (p) psqPhotoRemove(null, i); });
+    psq.step = 1; psq.contact = null; psq.startSentFor = ''; psq.picks = { addons: [], time: 'Anytime' }; psq.photosSent = false;
+    var f = psqEl('psq-form'); f.reset();
+    f.querySelectorAll('.is-on').forEach(function (b) { b.classList.remove('is-on'); b.setAttribute('aria-pressed', 'false'); });
+    psqSelect('time', 'Anytime');
+    f.querySelectorAll('.is-invalid').forEach(function (x) { x.classList.remove('is-invalid'); });
+    f.querySelectorAll('select').forEach(function (s) { s.classList.toggle('is-empty', !s.value); });
+    for (var i = 1; i <= PSQ_STEPS; i++) psqErr(i, '');
+    psqEl('psq-estimate').classList.remove('show');
+    var ps = psqEl('psq-photo-send'); ps.hidden = true; ps.disabled = false; ps.textContent = 'Send my photos';
+    psqPhotoHelp();
+    psqSummary();
   }
 
-  function tqGo(n) {
-    tq.step = n;
-    document.querySelectorAll('#tq-form .tq-step').forEach(function (s) {
-      s.classList.toggle('is-active', +s.getAttribute('data-step') === n);
+  // Programmatic pick (no auto-advance)
+  function psqSelect(group, value) {
+    var btn = Array.prototype.filter.call(document.querySelectorAll('#psq-form [data-group="' + group + '"]'), function (b) { return b.getAttribute('data-value') === value; })[0];
+    if (btn) psqPick(btn, true);
+  }
+
+  function psqGo(n, instant) {
+    psq.step = n;
+    document.querySelectorAll('#psq-form .psq-step').forEach(function (s) { s.classList.toggle('is-active', +s.getAttribute('data-step') === n); });
+    document.querySelectorAll('#psq-stepper li').forEach(function (li) {
+      var s = +li.getAttribute('data-s');
+      li.classList.toggle('is-done', s < n);
+      li.classList.toggle('is-current', s === n);
+      li.querySelector('button').disabled = !(s < n && n !== PSQ_DONE);
     });
-    document.getElementById('tq-progress').style.width = (Math.min(n, TQ_STEPS) / TQ_STEPS * 100) + '%';
-    var m = document.getElementById('quote-modal'); if (m) m.scrollTop = 0;
+    psqEl('psq-bar').style.width = (Math.min(n, PSQ_STEPS) / PSQ_STEPS * 100) + '%';
+    psqEl('psq-kicker').textContent = n === PSQ_DONE ? 'Request sent' : 'Step ' + n + ' of ' + PSQ_STEPS;
+    psqEl('psq-title').textContent = PSQ_TITLES[n];
+    psqEl('psq-actions').classList.toggle('is-hidden', n === PSQ_DONE);
+    psqEl('psq-back').classList.toggle('is-hidden', n === 1);
+    psqEl('psq-next-label').textContent = n === PSQ_STEPS ? 'Request my quote call' : 'Next';
+    if (n === PSQ_STEPS) psqSummary();
+    var main = psqEl('psq-main'); main.scrollTop = 0;
+    if (!instant) { var h = document.querySelector('.psq-step.is-active .psq-h'); if (h && window.innerWidth > 760) h.focus({ preventScroll: true }); }
   }
 
-  function tqErr(step, msg) { var e = document.getElementById('tq-err-' + step); if (e) e.textContent = msg; }
+  function psqJump(n) { if (n < psq.step && psq.step !== PSQ_DONE) psqGo(n); }
+  function psqErr(step, msg) { var e = psqEl('psq-err-' + step); if (e) e.textContent = msg; }
 
-  function tqPick(btn, quiet) {
+  function psqPick(btn, quiet) {
     var group = btn.getAttribute('data-group'), value = btn.getAttribute('data-value');
-    var all = document.querySelectorAll('#tq-form [data-group="' + group + '"]');
+    var all = document.querySelectorAll('#psq-form [data-group="' + group + '"]');
     if (group === 'addons') {
-      btn.classList.toggle('is-on');
-      tq.picks.addons = Array.prototype.filter.call(all, function (b) { return b.classList.contains('is-on'); })
-        .map(function (b) { return b.getAttribute('data-value'); });
+      var on = !btn.classList.contains('is-on');
+      btn.classList.toggle('is-on', on); btn.setAttribute('aria-pressed', on ? 'true' : 'false');
+      psq.picks.addons = Array.prototype.filter.call(all, function (b) { return b.classList.contains('is-on'); }).map(function (b) { return b.getAttribute('data-value'); });
     } else {
-      all.forEach(function (b) { b.classList.toggle('is-on', b === btn); });
-      tq.picks[group] = value;
+      all.forEach(function (b) { var me = b === btn; b.classList.toggle('is-on', me); b.setAttribute('aria-pressed', me ? 'true' : 'false'); });
+      psq.picks[group] = value;
     }
-    if (!quiet) tqErr(tq.step, '');
+    if (group === 'size') psqEstimate();
+    psqSummary();
+    if (quiet) return;
+    psqErr(psq.step, '');
+    if (PSQ_AUTO[group] === psq.step) {
+      var at = psq.step;
+      setTimeout(function () { if (psq.step === at) psqNext(); }, 380);
+    }
   }
 
-  function tqVal(id) { return (document.getElementById(id).value || '').trim(); }
-  function tqDigits(s) { var d = String(s).replace(/\D/g, ''); return (d.length === 11 && d.charAt(0) === '1') ? d.slice(1) : d; }
-  function tqFmtPhone(d) { return '(' + d.slice(0, 3) + ') ' + d.slice(3, 6) + '-' + d.slice(6); }
-  function tqCheck(list, step) {
+  function psqEstimate() {
+    var box = psqEl('psq-estimate'), t = psqEl('psq-estimate-text'), size = psq.picks.size;
+    if (!size) { box.classList.remove('show'); return; }
+    t.innerHTML = size === 'Not sure'
+      ? 'No problem &mdash; we&rsquo;ll figure out the size with you on the call.'
+      : 'A home that size usually has about <b>' + PSQ_PANES[size] + ' window panes</b>. We&rsquo;ll confirm the exact count on your call.';
+    box.classList.add('show');
+  }
+
+  function psqDigits(s) { var d = String(s).replace(/\D/g, ''); return (d.length === 11 && d.charAt(0) === '1') ? d.slice(1) : d; }
+  function psqFmtPhone(d) { return '(' + d.slice(0, 3) + ') ' + d.slice(3, 6) + '-' + d.slice(6); }
+  function psqCheck(list, step) {
     var bad = null;
     list.forEach(function (c) {
-      var ok = c[1](tqVal(c[0]));
-      document.getElementById(c[0]).parentNode.classList.toggle('is-invalid', !ok);
+      var ok = c[1](psqVal(c[0]));
+      psqEl(c[0]).parentNode.classList.toggle('is-invalid', !ok);
       if (!ok && !bad) bad = c;
     });
-    if (bad) { tqErr(step, bad[2]); document.getElementById(bad[0]).focus(); return false; }
-    tqErr(step, ''); return true;
+    if (bad) { psqErr(step, bad[2]); psqEl(bad[0]).focus(); return false; }
+    psqErr(step, ''); return true;
   }
 
-  function tqNext1() {
-    if (!tqCheck([
-      ['tq-first', function (v) { return v.length > 0; }, 'Enter your first name.'],
-      ['tq-last', function (v) { return v.length > 0; }, 'Enter your last name.'],
-      ['tq-email', function (v) { return !v || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v); }, 'That email doesn’t look right — fix it or leave it blank.'],
-      ['tq-phone', function (v) { return tqDigits(v).length === 10; }, 'Enter a 10-digit mobile number.']
-    ], 1)) return;
-    var d = tqDigits(tqVal('tq-phone'));
-    tq.contact = { first_name: tqVal('tq-first'), last_name: tqVal('tq-last'), phone: tqFmtPhone(d), email: tqVal('tq-email'),
-                   texts_ok: document.getElementById('tq-texts').checked ? 'Yes' : 'No' };
-    if (tq.startSentFor !== d) { tq.startSentFor = d; tqSend('started').catch(function () {}); }
-    tqGo(2);
+  function psqNext() {
+    var s = psq.step, p = psq.picks;
+    if (s === 1) {
+      if (!psqCheck([
+        ['psq-first', function (v) { return v.length > 0; }, 'Enter your first name.'],
+        ['psq-last', function (v) { return v.length > 0; }, 'Enter your last name.'],
+        ['psq-phone', function (v) { return psqDigits(v).length === 10; }, 'Enter a 10-digit mobile number so we can call you.'],
+        ['psq-email', function (v) { return !v || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v); }, 'That email doesn’t look right — fix it or leave it blank.']
+      ], 1)) return;
+      var d = psqDigits(psqVal('psq-phone'));
+      psq.contact = { first_name: psqVal('psq-first'), last_name: psqVal('psq-last'), phone: psqFmtPhone(d), email: psqVal('psq-email'),
+                      texts_ok: psqEl('psq-texts').checked ? 'Yes' : 'No' };
+      // The lead goes out right away, so Prime Shine can call even if they stop here
+      if (psq.startSentFor !== d) { psq.startSentFor = d; psqSend('started').catch(function () {}); }
+    }
+    if (s === 2 && !p.type) return psqErr(2, 'Pick the kind of property.');
+    if (s === 3 && !p.size) return psqErr(3, 'Pick the closest size — or “Not sure”.');
+    if (s === 4 && !p.panes) return psqErr(4, 'Tell us about French pane windows — or pick “Not sure”.');
+    if (s === 5 && !p.service) return psqErr(5, 'Pick a window cleaning — or “Not sure which one?”.');
+    if (s === 6 && !p.plan) psqSelect('plan', 'Not sure yet');
+    if (s === PSQ_STEPS) return psqSubmit();
+    psqGo(s + 1);
   }
 
-  function tqNext2() {
-    if (!tq.picks.service) { tqErr(2, 'Pick the cleaning you need — add-ons are optional.'); return; }
-    tqGo(3);
+  function psqBack() { if (psq.step > 1 && psq.step <= PSQ_STEPS) psqGo(psq.step - 1); }
+
+  function psqRows() {
+    var p = psq.picks;
+    return [
+      ['Property', p.type, 2], ['Home size', p.size && (p.size === 'Not sure' ? 'Not sure' : p.size), 3],
+      ['Window panes', p.size && p.size !== 'Not sure' ? 'About ' + PSQ_PANES[p.size] : '', 3],
+      ['French panes', p.panes, 4], ['Last cleaned', p.last, 4],
+      ['Cleaning', p.service, 5], ['Add-ons', (p.addons || []).join(', '), 5],
+      ['Membership', p.plan, 6]
+    ];
   }
 
-  function tqNext3() {
-    if (!tq.picks.frequency) { tqErr(3, 'Pick a membership, or choose a one-time cleaning.'); return; }
-    tqGo(4);
+  function psqSummary() {
+    var rows = psqRows(), esc = function (s) { return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;'); };
+    psqEl('psq-sum-rows').innerHTML = rows.map(function (r) {
+      var v = r[1], gold = r[0] === 'Membership' && v && v !== 'Not sure yet' && v !== 'One-time';
+      return '<div class="psq-sum-row"><span class="psq-sum-k">' + r[0] + '</span><span class="psq-sum-v' + (v ? (gold ? ' gold' : '') : ' is-empty') + '">' + (v ? esc(v) : '—') + '</span></div>';
+    }).join('');
+    var c = psq.contact;
+    var review = (c ? [['Name', c.first_name + ' ' + c.last_name, 1], ['Phone', c.phone, 1]] : []).concat(rows);
+    psqEl('psq-review').innerHTML = review.map(function (r) {
+      return '<div class="psq-review-row"><span class="psq-review-k">' + r[0] + '</span><span class="psq-review-v' + (r[1] ? '' : ' is-empty') + '">' + (r[1] ? esc(r[1]) : 'Not given') + '</span>' +
+             '<button type="button" class="psq-edit" onclick="psqGo(' + r[2] + ')">Edit</button></div>';
+    }).join('');
   }
 
   // Phoenix time (no daylight saving). Hours match the footer: Mon–Sat 8am–7pm.
-  function tqPhoenixNow() {
+  function psqPhoenixNow() {
     var parts = {};
     new Intl.DateTimeFormat('en-US', { timeZone: 'America/Phoenix', weekday: 'short', hour: 'numeric', hourCycle: 'h23' })
       .formatToParts(new Date()).forEach(function (x) { parts[x.type] = x.value; });
     return { day: parts.weekday, hour: parseInt(parts.hour, 10) };
   }
 
-  function tqDoneMessage() {
-    var now = tqPhoenixNow(), day = now.day, h = now.hour;
+  function psqDoneMessage() {
+    var now = psqPhoenixNow(), day = now.day, h = now.hour, t = psq.picks.time;
     var open = day !== 'Sun' && h >= 8 && h < 19;
-    var nextMorning = (day === 'Sat' && h >= 19) || day === 'Sun' ? 'Monday morning' : (h < 8 ? 'this morning after 8am' : 'first thing tomorrow morning');
-    if (open) return 'We’re putting together your custom quote now. <strong>Expect a call or text from ' + TQ_PHONE + ' within a few hours.</strong>';
-    return 'We’re closed right now, so we’ll reach out from <strong>' + TQ_PHONE + '</strong> ' + nextMorning + ' with your exact price.';
+    var nextMorning = (day === 'Sat' && h >= 19) || day === 'Sun' ? 'on Monday' : (h < 8 ? 'later this morning' : 'tomorrow');
+    var pref = t && t !== 'Anytime' ? ' We&rsquo;ll aim for the <strong>' + t.toLowerCase() + '</strong> like you asked.' : '';
+    if (open) return 'We&rsquo;re putting your quote together now. <strong>Expect a call from ' + PSQ_PHONE + ' within a few hours</strong> &mdash; we&rsquo;ll go over your exact price and answer any questions.' + pref;
+    return 'We&rsquo;re closed right now, so we&rsquo;ll call you from <strong>' + PSQ_PHONE + '</strong> ' + nextMorning + ' with your exact price.' + pref;
   }
 
-  function tqAddress() {
-    return [tqVal('tq-address'), tqVal('tq-city'), 'AZ', tqVal('tq-zip')].filter(Boolean).join(', ');
-  }
+  function psqAddress() { return [psqVal('psq-address'), psqVal('psq-city'), 'AZ', psqVal('psq-zip')].filter(Boolean).join(', '); }
 
-  function tqPayload(stage) {
-    var c = tq.contact || {}, p = tq.picks, done = stage === 'complete';
+  function psqPayload(stage) {
+    var c = psq.contact || {}, p = psq.picks, done = stage === 'complete';
     var name = (c.first_name + ' ' + c.last_name).trim();
-    var full = done ? tqAddress() : '';
-    var city = done ? tqVal('tq-city') : '';
-    var subject = !done
-      ? '🔥 NEW LEAD — call now: ' + name + ' · ' + c.phone
-      : '✅ QUOTE DETAILS: ' + name + ' · ' + city + ' · ' + (p.service || '') + ' · ' + (p.frequency || '') + (p.frequency && p.frequency !== 'One-time' ? ' (' + TQ_SAVINGS[p.frequency].replace(' per cleaning', '') + ')' : '');
-    return {
-      _subject: subject,
-      lead_status: done ? 'Finished the quote' : 'Started the quote (details to follow)',
-      name: name, phone: c.phone, email: c.email || '', address: full,
-      google_maps: full ? 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(full) : '',
-      service: p.service || '', add_ons: (p.addons || []).join(', ') || (done ? 'None' : ''),
-      frequency: p.frequency ? p.frequency + ' — ' + TQ_SAVINGS[p.frequency] : '',
-      property_type: done ? tqVal('tq-type') : '',
-      home_size: done ? tqVal('tq-size') : '',
-      french_panes: done ? tqVal('tq-panes') : '',
-      last_cleaned: done ? (tqVal('tq-last-cleaned') || 'Not given') : '',
-      referral_or_promo_code: tqVal('tq-code'), heard_about_us: tqVal('tq-hear'), texts_ok: c.texts_ok || '',
-      submitted: new Date().toLocaleString('en-US', { timeZone: 'America/Phoenix' }) + ' (Phoenix)'
+    var data = {
+      _subject: done
+        ? '✅ QUOTE CALL: ' + name + ' · ' + psqVal('psq-city') + ' · ' + (p.service || '') + ' · ' + (p.plan || '')
+        : '🔥 NEW LEAD — call now: ' + name + ' · ' + c.phone,
+      lead_status: done ? 'Finished the quote — call with their price' : 'Started the quote (details to follow)',
+      name: name, phone: c.phone, email: c.email || '', heard_about_us: psqVal('psq-hear'), referral_or_promo_code: psqVal('psq-code'), texts_ok: c.texts_ok || ''
     };
+    if (done) {
+      var full = psqAddress();
+      data.best_time_to_call = p.time || 'Anytime';
+      data.address = full;
+      data.google_maps = 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(full);
+      data.property_type = p.type || '';
+      data.home_size = p.size || '';
+      data.window_panes_estimate = p.size && PSQ_PANES[p.size] ? 'About ' + PSQ_PANES[p.size] : 'Not sure';
+      data.french_panes = p.panes || '';
+      data.last_cleaned = p.last || 'Not given';
+      data.cleaning = p.service || '';
+      data.add_ons = (p.addons || []).join(', ') || 'None';
+      data.membership = PSQ_PLAN[p.plan] || 'Not sure yet';
+    }
+    data.submitted = new Date().toLocaleString('en-US', { timeZone: 'America/Phoenix' }) + ' (Phoenix)';
+    return data;
   }
 
-  // Quote emails go to the Prime Shine inbox through formsubmit.co (same as the original site).
-  function tqSend(stage) {
-    if (document.getElementById('tq-honey').value) return Promise.resolve();
-    var data = tqPayload(stage);
-    var fd = new FormData();
+  // Quote emails go to the Prime Shine inbox through formsubmit.co
+  function psqSend(stage) {
+    if (psqEl('psq-honey').value) return Promise.resolve();
+    var data = psqPayload(stage), fd = new FormData();
     Object.keys(data).forEach(function (k) { if (data[k] !== '') fd.append(k, data[k]); });
     fd.append('_template', 'table');
     fd.append('_captcha', 'false');
-    return fetch('https://formsubmit.co/ajax/' + TQ_EMAIL, { method: 'POST', headers: { 'Accept': 'application/json' }, body: fd })
+    return fetch('https://formsubmit.co/ajax/' + PSQ_EMAIL, { method: 'POST', headers: { 'Accept': 'application/json' }, body: fd })
       .then(function (r) { if (!r.ok) throw new Error('relay ' + r.status); return r.json(); });
   }
 
-  function tqSubmit() {
-    if (!tqCheck([
-      ['tq-type', function (v) { return v.length > 0; }, 'Pick your property type.'],
-      ['tq-size', function (v) { return v.length > 0; }, 'Pick your home size.'],
-      ['tq-panes', function (v) { return v.length > 0; }, 'Tell us if you have French pane windows.'],
-      ['tq-address', function (v) { return v.length > 3; }, 'Enter your street address.'],
-      ['tq-city', function (v) { return v.length > 1; }, 'Enter your city.'],
-      ['tq-zip', function (v) { return /^\d{5}$/.test(v); }, 'Enter a 5-digit zip code.']
-    ], 4)) return;
-    var btn = document.getElementById('tq-submit'), label = document.getElementById('tq-submit-label');
+  function psqSubmit() {
+    if (!psqCheck([
+      ['psq-address', function (v) { return v.length > 3; }, 'Enter your street address.'],
+      ['psq-city', function (v) { return v.length > 1; }, 'Enter your city.'],
+      ['psq-zip', function (v) { return /^\d{5}$/.test(v); }, 'Enter a 5-digit zip code.']
+    ], PSQ_STEPS)) return;
+    var btn = psqEl('psq-next'), label = psqEl('psq-next-label');
     btn.disabled = true; label.textContent = 'Sending…';
-    tqSend('complete').then(function () {
-      document.getElementById('tq-done-title').textContent = 'You’re all set, ' + tq.contact.first_name + '!';
-      document.getElementById('tq-done-msg').innerHTML = tqDoneMessage();
-      tqGo(TQ_DONE);
+    psqSend('complete').then(function () {
+      btn.disabled = false;
+      psqEl('psq-done-title').textContent = 'You’re all set, ' + psq.contact.first_name + '!';
+      psqEl('psq-done-msg').innerHTML = psqDoneMessage();
+      psqGo(PSQ_DONE);
     }).catch(function () {
-      btn.disabled = false; label.textContent = 'Submit';
-      tqErr(4, 'We couldn’t send your request. Please call or text us at ' + TQ_PHONE + '.');
+      btn.disabled = false; label.textContent = 'Request my quote call';
+      psqErr(PSQ_STEPS, 'We couldn’t send your request. Please call or text us at ' + PSQ_PHONE + '.');
     });
   }
 
+  // Enter moves forward from any text box
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Enter' && e.target && e.target.closest && e.target.closest('#psq-form') && e.target.tagName === 'INPUT' && e.target.type !== 'checkbox' && e.target.type !== 'file') {
+      e.preventDefault(); psqNext();
+    }
+  });
+
   /* ── Optional photos on the confirmation screen: shrunk on the phone (max 1600px JPEG, strips location data) ── */
-  function tqPhotoHelp(msg, isError) {
-    var h = document.getElementById('tq-photo-help');
+  function psqPhotoHelp(msg, isError) {
+    var h = psqEl('psq-photo-help');
     h.textContent = msg || 'Tap a box to take a photo or choose one from your phone.';
     h.classList.toggle('is-error', !!isError);
   }
-  function tqPhotoCount() { return tq.photos.filter(function (p) { return p && p.blob; }).length; }
-  function tqPhotoButton() {
-    var b = document.getElementById('tq-photo-send'), n = tqPhotoCount();
-    b.hidden = n === 0 || tq.photosSent;
+  function psqPhotoCount() { return psq.photos.filter(function (p) { return p && p.blob; }).length; }
+  function psqPhotoButton() {
+    var b = psqEl('psq-photo-send'), n = psqPhotoCount();
+    b.hidden = n === 0 || psq.photosSent;
     b.textContent = 'Send my ' + (n === 1 ? 'photo' : n + ' photos');
   }
-
-  function tqShrink(file) {
+  function psqShrink(file) {
     return new Promise(function (resolve, reject) {
       var url = URL.createObjectURL(file), img = new Image();
       img.onload = function () {
@@ -3921,66 +4119,63 @@
       img.src = url;
     });
   }
-
-  function tqPhoto(input, i) {
+  function psqPhoto(input, i) {
     var file = input.files && input.files[0];
     input.value = '';
     if (!file) return;
-    if (!/^image\//.test(file.type) && !/\.(heic|heif|jpe?g|png|webp)$/i.test(file.name)) { tqPhotoHelp('That file isn’t a photo — try a picture from your camera roll.', true); return; }
-    if (tq.photosSent) { tq.photosSent = false; }
-    var box = document.querySelector('.tq-photo[data-slot="' + i + '"]');
-    box.classList.add('is-busy'); tq.photos[i] = { busy: true };
-    tqShrink(file).catch(function () {
+    if (!/^image\//.test(file.type) && !/\.(heic|heif|jpe?g|png|webp)$/i.test(file.name)) { psqPhotoHelp('That file isn’t a photo — try a picture from your camera roll.', true); return; }
+    psq.photosSent = false;
+    var box = document.querySelector('#psq .tq-photo[data-slot="' + i + '"]');
+    box.classList.add('is-busy'); psq.photos[i] = { busy: true };
+    psqShrink(file).catch(function () {
       if (file.size <= 3 * 1024 * 1024) return file;
       throw new Error('unreadable');
     }).then(function (blob) {
       var url = URL.createObjectURL(blob);
-      tq.photos[i] = { blob: blob, url: url, name: 'window-photo-' + (i + 1) + '.jpg' };
-      var total = tq.photos.reduce(function (s, p) { return s + (p && p.blob ? p.blob.size : 0); }, 0);
-      if (total > 9.5 * 1024 * 1024) { tqPhotoRemove(null, i); tqPhotoHelp('Those photos are too large together — try removing one.', true); return; }
+      psq.photos[i] = { blob: blob, url: url, name: 'window-photo-' + (i + 1) + '.jpg' };
+      var total = psq.photos.reduce(function (s, p) { return s + (p && p.blob ? p.blob.size : 0); }, 0);
+      if (total > 9.5 * 1024 * 1024) { psqPhotoRemove(null, i); psqPhotoHelp('Those photos are too large together — try removing one.', true); return; }
       var im = box.querySelector('img'); im.src = url; im.hidden = false;
       box.querySelector('.tq-photo-tag').hidden = false;
       box.classList.add('has-img');
-      tqPhotoHelp('Photo added. Add more, or tap Send.');
+      psqPhotoHelp('Photo added. Add more, or tap Send.');
     }).catch(function () {
-      tq.photos[i] = null;
-      tqPhotoHelp('We couldn’t read that photo — try a different one.', true);
-    }).then(function () { box.classList.remove('is-busy'); tqPhotoButton(); });
+      psq.photos[i] = null;
+      psqPhotoHelp('We couldn’t read that photo — try a different one.', true);
+    }).then(function () { box.classList.remove('is-busy'); psqPhotoButton(); });
   }
-
-  function tqPhotoRemove(e, i) {
+  function psqPhotoRemove(e, i) {
     if (e) { e.preventDefault(); e.stopPropagation(); }
-    var p = tq.photos[i]; if (p && p.url) URL.revokeObjectURL(p.url);
-    tq.photos[i] = null;
-    var box = document.querySelector('.tq-photo[data-slot="' + i + '"]');
+    var p = psq.photos[i]; if (p && p.url) URL.revokeObjectURL(p.url);
+    psq.photos[i] = null;
+    var box = document.querySelector('#psq .tq-photo[data-slot="' + i + '"]');
     if (box) {
       var im = box.querySelector('img'); im.hidden = true; im.removeAttribute('src');
       box.querySelector('.tq-photo-tag').hidden = true;
       box.classList.remove('has-img');
     }
-    if (e) tqPhotoHelp();
-    tqPhotoButton();
+    if (e) psqPhotoHelp();
+    psqPhotoButton();
   }
-
   // formsubmit only accepts attachments on a normal multipart POST, so post into a hidden iframe.
-  function tqSendPhotos() {
-    if (!tqPhotoCount() || !tq.contact) return;
-    var btn = document.getElementById('tq-photo-send');
+  function psqSendPhotos() {
+    if (!psqPhotoCount() || !psq.contact) return;
+    var btn = psqEl('psq-photo-send');
     btn.disabled = true; btn.textContent = 'Sending…';
-    var c = tq.contact;
+    var c = psq.contact, name = (c.first_name + ' ' + c.last_name).trim();
     var data = {
-      _subject: '📷 PHOTOS: ' + (c.first_name + ' ' + c.last_name).trim() + ' · ' + tqVal('tq-city') + ' · ' + c.phone,
-      name: (c.first_name + ' ' + c.last_name).trim(), phone: c.phone, address: tqAddress(),
-      photos: tq.photos.map(function (ph, i) { return ph && ph.blob ? TQ_PHOTO_LABELS[i] : null; }).filter(Boolean).join(', ')
+      _subject: '📷 PHOTOS: ' + name + ' · ' + psqVal('psq-city') + ' · ' + c.phone,
+      name: name, phone: c.phone, address: psqAddress(),
+      photos: psq.photos.map(function (ph, i) { return ph && ph.blob ? PSQ_PHOTO_LABELS[i] : null; }).filter(Boolean).join(', ')
     };
     var f = document.createElement('form');
-    f.method = 'POST'; f.enctype = 'multipart/form-data'; f.target = 'tq-sink';
-    f.action = 'https://formsubmit.co/' + TQ_EMAIL; f.style.display = 'none';
+    f.method = 'POST'; f.enctype = 'multipart/form-data'; f.target = 'psq-sink';
+    f.action = 'https://formsubmit.co/' + PSQ_EMAIL; f.style.display = 'none';
     var add = function (k, v) { var inp = document.createElement('input'); inp.type = 'hidden'; inp.name = k; inp.value = v; f.appendChild(inp); };
     Object.keys(data).forEach(function (k) { add(k, data[k]); });
     add('_template', 'table'); add('_captcha', 'false');
     var attached = 0;
-    tq.photos.forEach(function (p, idx) {
+    psq.photos.forEach(function (p, idx) {
       if (!p || !p.blob) return;
       try {
         var dt = new DataTransfer();
@@ -3991,20 +4186,33 @@
     });
     if (!attached) {
       btn.disabled = false; btn.textContent = 'Send my photos';
-      tqPhotoHelp('Your browser couldn’t attach photos here — please text them to ' + TQ_PHONE + '.', true);
+      psqPhotoHelp('Your browser couldn’t attach photos here — please text them to ' + PSQ_PHONE + '.', true);
       return;
     }
-    var sink = document.getElementById('tq-sink'), finished = false;
+    var sink = psqEl('psq-sink'), finished = false;
     var finish = function () {
       if (finished) return; finished = true;
       setTimeout(function () { f.remove(); }, 1000);
-      tq.photosSent = true; tqPhotoButton();
-      tqPhotoHelp('Thanks! Your photos were sent.');
+      psq.photosSent = true; psqPhotoButton();
+      psqPhotoHelp('Thanks! Your photos were sent.');
     };
     sink.onload = finish;
     setTimeout(finish, 20000);
     document.body.appendChild(f);
     f.submit();
+  }
+
+  psqSummary();
+</script>
+<script>
+  /* ── Mobile Menu ─────────────────────────────────────────── */
+  function toggleMobile() {
+    document.getElementById('mobile-menu').classList.toggle('open');
+    document.body.style.overflow = document.getElementById('mobile-menu').classList.contains('open') ? 'hidden' : '';
+  }
+  function closeMobile() {
+    document.getElementById('mobile-menu').classList.remove('open');
+    document.body.style.overflow = '';
   }
 
   /* ── Give $50, Get $50 referral form ─────────────────────────── */
@@ -4123,7 +4331,7 @@
       fd.append('referral_' + n + '_phone', p.phone);
       if (p.address) fd.append('referral_' + n + '_address', p.address);
     });
-    fetch('https://formsubmit.co/ajax/' + TQ_EMAIL, { method: 'POST', headers: { 'Accept': 'application/json' }, body: fd })
+    fetch('https://formsubmit.co/ajax/' + PSQ_EMAIL, { method: 'POST', headers: { 'Accept': 'application/json' }, body: fd })
       .then(function(r) { if (!r.ok) throw new Error('relay ' + r.status); return r.json(); })
       .then(showRefSuccess, function() {
         if (btn) { btn.disabled = false; btn.innerHTML = btnLabel; }
