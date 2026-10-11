@@ -2743,7 +2743,7 @@
 
   .psq-body { flex: 1; min-height: 0; display: grid; grid-template-columns: minmax(0, 1fr) 360px; }
   .psq-col { display: flex; flex-direction: column; min-width: 0; min-height: 0; }
-  .psq-main { flex: 1; min-height: 0; position: relative; overflow-y: auto; padding: 30px 56px 28px; overscroll-behavior: contain; }
+  .psq-main { flex: 1; min-height: 0; position: relative; overflow-y: auto; padding: 28px 56px 12px; overscroll-behavior: contain; }
   .psq-main > form { width: 100%; max-width: 1040px; margin: 0 auto; }
   .psq-side { overflow-y: auto; background: #fff; border-left: 1px solid #e3eaf3; padding: 28px 24px; display: flex; flex-direction: column; gap: 18px; }
 
@@ -2913,6 +2913,64 @@
   .psq-done .tq-photo-box p, .psq-done .tq-photo-label { font-size: 14.5px; }
   .psq-done-actions { margin-top: 26px; }
 
+
+  /* ── Super-simple layout: one centered column, a 4-part progress bar, no side panel ── */
+  .psq-body { grid-template-columns: minmax(0, 1fr) !important; }
+  .psq-main > form, .psq-actions-in { max-width: 900px; }
+  .psq-progress { display: flex; gap: 6px; padding: 14px 24px; background: #fff; border-bottom: 1px solid #e3eaf3; }
+  .psq-progress i { flex: 1; height: 8px; border-radius: 8px; background: #e3eaf3; transition: background .3s; }
+  .psq-progress i.on { background: linear-gradient(90deg, #fac544, #e8a913); }
+  .psq-progress i.on:last-child, .psq-progress i.on + i:not(.on) { }
+  .psq-next.is-hidden { display: none; }
+
+  /* Window cleaning: the big, obvious pick */
+  .psq-hero { position: relative; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); width: 100%; padding: 10px; text-align: left; cursor: pointer;
+    font-family: inherit; color: #fff; border: 3px solid #0d3159; border-radius: 28px;
+    background: linear-gradient(165deg, #1e5fa8 0%, #0d3159 55%, #0c2340 100%); box-shadow: 0 18px 40px rgba(12,35,64,0.22); transition: transform .18s, box-shadow .18s; }
+  .psq-hero:hover { transform: translateY(-2px); }
+  .psq-hero.is-on { box-shadow: 0 0 0 6px #fac544, 0 20px 44px rgba(12,35,64,0.3); }
+  .psq-hero:focus-visible { outline: 3px solid #fac544; outline-offset: 4px; }
+  .psq-hero-pic { aspect-ratio: 16 / 9; border-radius: 20px; background: rgba(255,255,255,0.06); }
+  .psq-step[data-key="services"] .psq-group { margin-top: 22px; }
+  .psq-step[data-key="services"] .psq-step-head { margin-bottom: 18px; }
+  .psq-hero-pic .media-frame, .psq-hero-pic .media-slot { border-radius: 20px; }
+  .psq-hero-pic .media-slot { background: repeating-linear-gradient(135deg, rgba(255,255,255,0.12) 0 14px, rgba(255,255,255,0.06) 14px 28px); border-color: rgba(255,255,255,0.45); color: #fff; }
+  .psq-hero-pic .media-slot-icon { background: #fac544; color: #0c2340; width: 54px; height: 54px; }
+  .psq-hero-pic .media-slot-title { font-size: 0.82rem; }
+  .psq-hero-body { display: flex; flex-direction: column; justify-content: center; gap: 12px; padding: 20px 26px 20px 28px; }
+  .psq-tag--inline { position: static; align-self: flex-start; }
+  .psq-hero-title { font-size: clamp(32px, 3.4vw, 46px); font-weight: 900; line-height: 1.02; letter-spacing: -0.02em; }
+  .psq-hero-sub { font-size: 19px; color: rgba(255,255,255,0.9); line-height: 1.45; }
+  .psq-hero-points { display: flex; flex-direction: column; gap: 8px; font-size: 16.5px; font-weight: 800; }
+  .psq-hero-points span::before { content: "\2713"; color: #fac544; margin-right: 8px; font-weight: 900; }
+  .psq-hero > .psq-check { top: 22px; right: 22px; width: 48px; height: 48px; border-radius: 13px; border-color: rgba(255,255,255,0.7); }
+  .psq-hero > .psq-check svg { width: 24px; height: 24px; }
+
+  /* Other services: small optional add-ons */
+  .psq-extras { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+  .psq-extra { position: relative; display: flex; align-items: center; gap: 12px; padding: 10px 52px 10px 12px; background: #fff; border: 2px solid #d3deea; border-radius: 18px;
+    font: 800 17px 'Inter', system-ui, sans-serif; color: #0c2340; cursor: pointer; text-align: left; transition: border-color .15s, box-shadow .15s, transform .15s; }
+  .psq-extra:hover { border-color: #a9c6e6; transform: translateY(-2px); }
+  .psq-extra:focus-visible { outline: 3px solid #fac544; outline-offset: 2px; }
+  .psq-extra.is-on { border-color: #0d3159; box-shadow: 0 0 0 4px rgba(250,197,68,0.7); }
+  .psq-extra-ico { flex: 0 0 42px; height: 42px; border-radius: 12px; background: #eaf2fa; color: #1e5fa8; display: grid; place-items: center; }
+  .psq-extra > .psq-check { top: 50%; right: 14px; width: 30px; height: 30px; border-radius: 9px; transform: translateY(-50%); }
+  .psq-extra.is-on > .psq-check { transform: translateY(-50%) scale(1.08); }
+  .psq-extra > .psq-check svg { width: 15px; height: 15px; }
+
+  /* Stories: big numbers instead of photos */
+  .psq-card--num .psq-pic { display: grid; place-items: center; aspect-ratio: 4 / 3; background: linear-gradient(160deg, #eaf2fa, #dbe8f6); }
+  .psq-num { font-size: clamp(64px, 7vw, 96px); font-weight: 900; color: #1e5fa8; line-height: 1; letter-spacing: -0.03em; }
+  .psq-card--num.is-on .psq-pic { background: linear-gradient(160deg, #1e5fa8, #0d3159); }
+  .psq-card--num.is-on .psq-num { color: #fac544; }
+  .psq-skip { display: block; margin: 18px auto 0; background: none; border: 0; color: #1e5fa8; font: 800 16.5px 'Inter', system-ui, sans-serif; text-decoration: underline; cursor: pointer; padding: 8px; }
+
+  /* Contact step */
+  .psq-recap { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: -4px 0 22px; }
+  .psq-recap span { background: #fff; border: 1px solid #d3deea; border-radius: 999px; padding: 8px 15px; font-weight: 800; font-size: 15px; color: #0c2340; }
+  .psq-recap span::before { content: "\2713"; color: #1e5fa8; margin-right: 6px; font-weight: 900; }
+  .psq-recap-edit { background: none; border: 0; color: #1e5fa8; font: 800 15px 'Inter', system-ui, sans-serif; text-decoration: underline; cursor: pointer; padding: 6px; }
+  .psq-fields--addr { grid-template-columns: minmax(0, 1fr) 200px; margin-top: 18px; }
   @media (max-width: 1280px) {
     .psq-body { grid-template-columns: minmax(0, 1fr) 320px; }
     .psq-main { padding: 28px 40px 26px; }
@@ -2988,6 +3046,40 @@
     .psq-back { font-size: 17px; }
     .psq-next { padding: 18px 32px; font-size: 17px; }
     .psq-done-msg { font-size: 17.5px; }
+  }
+  @media (max-width: 760px) {
+    .psq-progress { padding: 10px 14px; gap: 5px; }
+    .psq-progress i { height: 6px; }
+    .psq-hero { grid-template-columns: 1fr; border-radius: 22px; padding: 8px; }
+    .psq-hero-pic { aspect-ratio: 16 / 9; border-radius: 16px; }
+    .psq-hero-pic .media-frame, .psq-hero-pic .media-slot { border-radius: 16px; }
+    .psq-hero-body { padding: 14px 12px 12px; gap: 8px; }
+    .psq-hero-title { font-size: 32px; }
+    .psq-hero-sub { font-size: 16.5px; }
+    .psq-hero-points { font-size: 15px; }
+    .psq-hero > .psq-check { top: 16px; right: 16px; width: 40px; height: 40px; }
+    .psq-extras { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+    .psq-extra { padding: 12px 40px 12px 10px; font-size: 15px; gap: 9px; border-radius: 15px; }
+    .psq-extra-ico { flex-basis: 38px; height: 38px; border-radius: 11px; }
+    .psq-extra > .psq-check { right: 10px; width: 24px; height: 24px; border-radius: 7px; }
+    .psq-grid--3 .psq-card--num, .psq-grid--3 > .psq-card { }
+    .psq-fields--addr { grid-template-columns: 1fr; }
+    .psq-recap span { font-size: 14px; padding: 7px 12px; }
+    .psq-actions-in { gap: 10px; }
+    .psq-back { white-space: nowrap; font-size: 16px; padding: 12px 4px; }
+    .psq-next { white-space: nowrap; font-size: 15.5px; letter-spacing: .02em; padding: 17px 22px; gap: 8px; }
+  }
+  @media (max-width: 760px) {
+    /* place + stories: 3 small cards in a row instead of 3 tall ones */
+    .psq-step[data-key="place"] .psq-grid--3, .psq-step[data-key="stories"] .psq-grid--3 { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+    .psq-step[data-key="place"] .psq-card, .psq-step[data-key="stories"] .psq-card { padding: 5px 5px 10px; }
+    .psq-step[data-key="place"] .psq-card-title, .psq-step[data-key="stories"] .psq-card-title { font-size: 14.5px; }
+    .psq-step[data-key="place"] .psq-card-sub, .psq-step[data-key="stories"] .psq-card-sub { font-size: 12px; }
+    .psq-step[data-key="place"] .psq-pic { aspect-ratio: 1 / 1; }
+    .psq-step[data-key="place"] .psq-pic .media-slot-title { font-size: 0.56rem; }
+    .psq-step[data-key="place"] .psq-pic .media-slot-icon { width: 32px; height: 32px; }
+    .psq-step[data-key="place"] .psq-check, .psq-step[data-key="stories"] .psq-check { width: 24px; height: 24px; top: 9px; right: 9px; }
+    .psq-num { font-size: 56px; }
   }
 </style>
 </head>
@@ -3858,18 +3950,17 @@
   <div class="psq-dialog">
     <div class="psq-head">
       <img class="psq-head-logo" src="logo-wide.png" alt="Prime Shine USA — Exterior Experts" />
-      <div class="psq-head-mid"><div class="psq-head-kicker" id="psq-kicker">Step 1</div><div class="psq-head-title" id="psq-title">Your free quote</div></div>
+      <div class="psq-head-mid"><div class="psq-head-kicker" id="psq-kicker">Step 1 of 4</div><div class="psq-head-title" id="psq-title">Your free quote</div></div>
       <a class="psq-head-google" href="https://www.google.com/search?q=Prime+Shine+USA+Window+Washing+Phoenix" target="_blank" rel="noopener"><span>&#9733;&#9733;&#9733;&#9733;&#9733;</span> 5.0 on Google</a>
       <button type="button" class="psq-close" onclick="closeQuoteModal()" aria-label="Close">&#215;</button>
     </div>
-    <ol class="psq-stepper" id="psq-stepper"></ol>
-    <div class="psq-bar" aria-hidden="true"><i id="psq-bar"></i></div>
+    <div class="psq-progress" id="psq-progress" aria-hidden="true"></div>
     <div class="psq-body">
       <div class="psq-col">
       <div class="psq-main" id="psq-main">
         <form id="psq-form" novalidate onsubmit="return false;">
           <div class="tq-hp" aria-hidden="true"><label>Leave this empty <input type="text" name="_honey" id="psq-honey" tabindex="-1" autocomplete="off" /></label></div>
-          <div class="psq-step is-active" data-key="you" role="group" aria-labelledby="psq-h-you"><div class="psq-step-head"><h2 class="psq-h" id="psq-h-you" tabindex="-1">Let&rsquo;s get to know <span class="tc-hl">you</span></h2><p class="psq-sub">Takes about a minute. No prices to figure out &mdash; we&rsquo;ll call you with your exact quote.</p></div><div class="psq-fields"><div class="psq-field"><svg class="psq-ico" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="12" cy="7.5" r="4.5"/><path d="M3 21c0-5 4-8 9-8s9 3 9 8z"/></svg><input id="psq-first" type="text" placeholder="First name" aria-label="First name" autocomplete="given-name"/></div><div class="psq-field"><svg class="psq-ico" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="12" cy="7.5" r="4.5"/><path d="M3 21c0-5 4-8 9-8s9 3 9 8z"/></svg><input id="psq-last" type="text" placeholder="Last name" aria-label="Last name" autocomplete="family-name"/></div><div class="psq-field"><svg class="psq-ico" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6.6 10.8a15.1 15.1 0 0 0 6.6 6.6l2.2-2.2a1 1 0 0 1 1-.25 11.4 11.4 0 0 0 3.6.57 1 1 0 0 1 1 1V20a1 1 0 0 1-1 1A17 17 0 0 1 3 4a1 1 0 0 1 1-1h3.5a1 1 0 0 1 1 1c0 1.25.2 2.45.57 3.6a1 1 0 0 1-.25 1z"/></svg><input id="psq-phone" type="tel" placeholder="Mobile phone" aria-label="Mobile phone" inputmode="tel" autocomplete="tel"/></div><div class="psq-field"><svg class="psq-ico" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M2 5h20v14H2z"/><path d="M2 5l10 8 10-8" fill="none" stroke="#fff" stroke-width="2"/></svg><input id="psq-email" type="email" placeholder="Email (optional)" aria-label="Email (optional)" autocomplete="email"/></div></div><div class="psq-trust"><span>Free quote</span><span>No obligation</span><span>We call you with your price</span><span>100% satisfaction guarantee</span></div><div class="psq-consent"><label class="psq-checkline"><input type="checkbox" id="psq-texts" /> <span>I agree to receive marketing text messages from Prime Shine USA about promotions, seasonal offers, and special deals.</span></label><p class="psq-fine">By checking this box, you agree to receive marketing texts from Prime Shine USA at the number provided (about 2&ndash;4 per month). Not required to book. Msg &amp; data rates may apply. Reply STOP to opt out, HELP for help. By tapping Next, you agree Prime Shine USA may call or text you about your quote. See our <a href="privacy.html" target="_blank" rel="noopener">Privacy Policy</a> and <a href="terms.html" target="_blank" rel="noopener">Terms</a>.</p></div><div class="psq-err" id="psq-err-you" role="alert"></div></div><div class="psq-step" data-key="services" role="group" aria-labelledby="psq-h-services"><div class="psq-step-head"><h2 class="psq-h" id="psq-h-services" tabindex="-1">What can we <span class="tc-hl">help</span> with?</h2><p class="psq-sub">Pick everything you&rsquo;d like quoted &mdash; you can choose more than one.</p></div><div class="psq-grid psq-grid--3x psq-grid--svcs"><button type="button" class="psq-card psq-card--featured" data-group="services" data-value="Window cleaning" data-multi="1" aria-pressed="false" onclick="psqPick(this)"><span class="psq-tag">Most popular</span><span class="psq-check" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span><span class="psq-pic"><span class="media-frame" data-type="image" data-src="" data-alt="Window cleaning"><span class="media-slot"><span class="media-slot-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h3l2-3h6l2 3h3a1 1 0 011 1v10a1 1 0 01-1 1H4a1 1 0 01-1-1V9a1 1 0 011-1z"/><circle cx="12" cy="13.5" r="3.8"/></svg></span><span class="media-slot-title">Window cleaning photo</span></span></span></span><span class="psq-card-title">Window cleaning</span><span class="psq-card-sub">Streak-free glass, inside and out</span></button><button type="button" class="psq-card " data-group="services" data-value="Pressure washing" data-multi="1" aria-pressed="false" onclick="psqPick(this)"><span class="psq-check" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span><span class="psq-pic"><span class="media-frame" data-type="image" data-src="" data-alt="Pressure washing"><span class="media-slot"><span class="media-slot-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h3l2-3h6l2 3h3a1 1 0 011 1v10a1 1 0 01-1 1H4a1 1 0 01-1-1V9a1 1 0 011-1z"/><circle cx="12" cy="13.5" r="3.8"/></svg></span><span class="media-slot-title">Pressure washing photo</span></span></span></span><span class="psq-card-title">Pressure washing</span><span class="psq-card-sub">Driveways, patios, pool decks &amp; walkways</span></button><button type="button" class="psq-card " data-group="services" data-value="Solar panel cleaning" data-multi="1" aria-pressed="false" onclick="psqPick(this)"><span class="psq-check" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span><span class="psq-pic"><span class="media-frame" data-type="image" data-src="" data-alt="Solar panel cleaning"><span class="media-slot"><span class="media-slot-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h3l2-3h6l2 3h3a1 1 0 011 1v10a1 1 0 01-1 1H4a1 1 0 01-1-1V9a1 1 0 011-1z"/><circle cx="12" cy="13.5" r="3.8"/></svg></span><span class="media-slot-title">Solar panel photo</span></span></span></span><span class="psq-card-title">Solar panel cleaning</span><span class="psq-card-sub">Safe, no-scratch clean for more power</span></button><button type="button" class="psq-card " data-group="services" data-value="Gutter cleaning" data-multi="1" aria-pressed="false" onclick="psqPick(this)"><span class="psq-check" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span><span class="psq-pic"><span class="media-frame" data-type="image" data-src="" data-alt="Gutter cleaning"><span class="media-slot"><span class="media-slot-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h3l2-3h6l2 3h3a1 1 0 011 1v10a1 1 0 01-1 1H4a1 1 0 01-1-1V9a1 1 0 011-1z"/><circle cx="12" cy="13.5" r="3.8"/></svg></span><span class="media-slot-title">Gutter photo</span></span></span></span><span class="psq-card-title">Gutter cleaning</span><span class="psq-card-sub">Cleared by hand and flushed out</span></button><button type="button" class="psq-card " data-group="services" data-value="Soft washing" data-multi="1" aria-pressed="false" onclick="psqPick(this)"><span class="psq-check" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span><span class="psq-pic"><span class="media-frame" data-type="image" data-src="" data-alt="Soft washing"><span class="media-slot"><span class="media-slot-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h3l2-3h6l2 3h3a1 1 0 011 1v10a1 1 0 01-1 1H4a1 1 0 01-1-1V9a1 1 0 011-1z"/><circle cx="12" cy="13.5" r="3.8"/></svg></span><span class="media-slot-title">Soft washing photo</span></span></span></span><span class="psq-card-title">Soft washing</span><span class="psq-card-sub">Stucco, siding &amp; roofs &mdash; low pressure</span></button><button type="button" class="psq-card " data-group="services" data-value="Holiday light installation" data-multi="1" aria-pressed="false" onclick="psqPick(this)"><span class="psq-check" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span><span class="psq-pic"><span class="media-frame" data-type="image" data-src="" data-alt="Holiday light installation"><span class="media-slot"><span class="media-slot-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h3l2-3h6l2 3h3a1 1 0 011 1v10a1 1 0 01-1 1H4a1 1 0 01-1-1V9a1 1 0 011-1z"/><circle cx="12" cy="13.5" r="3.8"/></svg></span><span class="media-slot-title">Holiday lights photo</span></span></span></span><span class="psq-card-title">Holiday light installation</span><span class="psq-card-sub">Design, install &amp; takedown</span></button></div><div class="psq-err" id="psq-err-services" role="alert"></div></div><div class="psq-step" data-key="property" role="group" aria-labelledby="psq-h-property"><div class="psq-step-head"><h2 class="psq-h" id="psq-h-property" tabindex="-1">What kind of <span class="tc-hl">property</span>?</h2><p class="psq-sub">Pick the one that fits best.</p></div><div class="psq-grid psq-grid--5"><button type="button" class="psq-card " data-group="type" data-value="House" aria-pressed="false" onclick="psqPick(this)"><span class="psq-check" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span><span class="psq-pic"><span class="media-frame" data-type="image" data-src="" data-alt="House"><span class="media-slot"><span class="media-slot-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h3l2-3h6l2 3h3a1 1 0 011 1v10a1 1 0 01-1 1H4a1 1 0 01-1-1V9a1 1 0 011-1z"/><circle cx="12" cy="13.5" r="3.8"/></svg></span><span class="media-slot-title">House photo</span></span></span></span><span class="psq-card-title">House</span><span class="psq-card-sub">Single or multi-level home</span></button><button type="button" class="psq-card " data-group="type" data-value="Townhome" aria-pressed="false" onclick="psqPick(this)"><span class="psq-check" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span><span class="psq-pic"><span class="media-frame" data-type="image" data-src="" data-alt="Townhome"><span class="media-slot"><span class="media-slot-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h3l2-3h6l2 3h3a1 1 0 011 1v10a1 1 0 01-1 1H4a1 1 0 01-1-1V9a1 1 0 011-1z"/><circle cx="12" cy="13.5" r="3.8"/></svg></span><span class="media-slot-title">Townhome photo</span></span></span></span><span class="psq-card-title">Townhome</span><span class="psq-card-sub">Attached residential home</span></button><button type="button" class="psq-card " data-group="type" data-value="Condo" aria-pressed="false" onclick="psqPick(this)"><span class="psq-check" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span><span class="psq-pic"><span class="media-frame" data-type="image" data-src="" data-alt="Condo"><span class="media-slot"><span class="media-slot-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h3l2-3h6l2 3h3a1 1 0 011 1v10a1 1 0 01-1 1H4a1 1 0 01-1-1V9a1 1 0 011-1z"/><circle cx="12" cy="13.5" r="3.8"/></svg></span><span class="media-slot-title">Condo photo</span></span></span></span><span class="psq-card-title">Condo</span><span class="psq-card-sub">A unit in a shared building</span></button><button type="button" class="psq-card " data-group="type" data-value="Storefront" aria-pressed="false" onclick="psqPick(this)"><span class="psq-check" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span><span class="psq-pic"><span class="media-frame" data-type="image" data-src="" data-alt="Storefront"><span class="media-slot"><span class="media-slot-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h3l2-3h6l2 3h3a1 1 0 011 1v10a1 1 0 01-1 1H4a1 1 0 01-1-1V9a1 1 0 011-1z"/><circle cx="12" cy="13.5" r="3.8"/></svg></span><span class="media-slot-title">Storefront photo</span></span></span></span><span class="psq-card-title">Storefront</span><span class="psq-card-sub">Shop or restaurant</span></button><button type="button" class="psq-card " data-group="type" data-value="Commercial building" aria-pressed="false" onclick="psqPick(this)"><span class="psq-check" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span><span class="psq-pic"><span class="media-frame" data-type="image" data-src="" data-alt="Commercial building"><span class="media-slot"><span class="media-slot-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h3l2-3h6l2 3h3a1 1 0 011 1v10a1 1 0 01-1 1H4a1 1 0 01-1-1V9a1 1 0 011-1z"/><circle cx="12" cy="13.5" r="3.8"/></svg></span><span class="media-slot-title">Building photo</span></span></span></span><span class="psq-card-title">Commercial building</span><span class="psq-card-sub">Office or business building</span></button></div><div class="psq-err" id="psq-err-property" role="alert"></div></div><div class="psq-step" data-key="size" role="group" aria-labelledby="psq-h-size"><div class="psq-step-head"><h2 class="psq-h" id="psq-h-size" tabindex="-1">How big is the <span class="tc-hl">place</span>?</h2><p class="psq-sub">Just pick the closest &mdash; no measuring. We&rsquo;ll confirm everything on the call.</p></div><div class="psq-grid psq-grid--3x"><button type="button" class="psq-card " data-group="size" data-value="Under 2,500 sq ft" aria-pressed="false" onclick="psqPick(this)"><span class="psq-check" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span><span class="psq-pic"><span class="media-frame" data-type="image" data-src="" data-alt="Under 2,500 sq ft"><span class="media-slot"><span class="media-slot-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h3l2-3h6l2 3h3a1 1 0 011 1v10a1 1 0 01-1 1H4a1 1 0 01-1-1V9a1 1 0 011-1z"/><circle cx="12" cy="13.5" r="3.8"/></svg></span><span class="media-slot-title">Small home photo</span></span></span></span><span class="psq-card-title">Under 2,500 sq ft</span><span class="psq-card-sub">About 0–20 panes</span></button><button type="button" class="psq-card " data-group="size" data-value="2,500–3,499 sq ft" aria-pressed="false" onclick="psqPick(this)"><span class="psq-check" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span><span class="psq-pic"><span class="media-frame" data-type="image" data-src="" data-alt="2,500–3,499 sq ft"><span class="media-slot"><span class="media-slot-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h3l2-3h6l2 3h3a1 1 0 011 1v10a1 1 0 01-1 1H4a1 1 0 01-1-1V9a1 1 0 011-1z"/><circle cx="12" cy="13.5" r="3.8"/></svg></span><span class="media-slot-title">Mid-size home photo</span></span></span></span><span class="psq-card-title">2,500–3,499 sq ft</span><span class="psq-card-sub">About 21–40 panes</span></button><button type="button" class="psq-card " data-group="size" data-value="3,500–4,999 sq ft" aria-pressed="false" onclick="psqPick(this)"><span class="psq-check" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span><span class="psq-pic"><span class="media-frame" data-type="image" data-src="" data-alt="3,500–4,999 sq ft"><span class="media-slot"><span class="media-slot-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h3l2-3h6l2 3h3a1 1 0 011 1v10a1 1 0 01-1 1H4a1 1 0 01-1-1V9a1 1 0 011-1z"/><circle cx="12" cy="13.5" r="3.8"/></svg></span><span class="media-slot-title">Two-story home photo</span></span></span></span><span class="psq-card-title">3,500–4,999 sq ft</span><span class="psq-card-sub">About 41–60 panes</span></button><button type="button" class="psq-card " data-group="size" data-value="5,000–6,499 sq ft" aria-pressed="false" onclick="psqPick(this)"><span class="psq-check" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span><span class="psq-pic"><span class="media-frame" data-type="image" data-src="" data-alt="5,000–6,499 sq ft"><span class="media-slot"><span class="media-slot-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h3l2-3h6l2 3h3a1 1 0 011 1v10a1 1 0 01-1 1H4a1 1 0 01-1-1V9a1 1 0 011-1z"/><circle cx="12" cy="13.5" r="3.8"/></svg></span><span class="media-slot-title">Large home photo</span></span></span></span><span class="psq-card-title">5,000–6,499 sq ft</span><span class="psq-card-sub">About 61–80 panes</span></button><button type="button" class="psq-card " data-group="size" data-value="6,500–7,999 sq ft" aria-pressed="false" onclick="psqPick(this)"><span class="psq-check" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span><span class="psq-pic"><span class="media-frame" data-type="image" data-src="" data-alt="6,500–7,999 sq ft"><span class="media-slot"><span class="media-slot-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h3l2-3h6l2 3h3a1 1 0 011 1v10a1 1 0 01-1 1H4a1 1 0 01-1-1V9a1 1 0 011-1z"/><circle cx="12" cy="13.5" r="3.8"/></svg></span><span class="media-slot-title">Larger home photo</span></span></span></span><span class="psq-card-title">6,500–7,999 sq ft</span><span class="psq-card-sub">About 81–99 panes</span></button><button type="button" class="psq-card " data-group="size" data-value="8,000+ sq ft" aria-pressed="false" onclick="psqPick(this)"><span class="psq-check" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span><span class="psq-pic"><span class="media-frame" data-type="image" data-src="" data-alt="8,000+ sq ft"><span class="media-slot"><span class="media-slot-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h3l2-3h6l2 3h3a1 1 0 011 1v10a1 1 0 01-1 1H4a1 1 0 01-1-1V9a1 1 0 011-1z"/><circle cx="12" cy="13.5" r="3.8"/></svg></span><span class="media-slot-title">Estate home photo</span></span></span></span><span class="psq-card-title">8,000+ sq ft</span><span class="psq-card-sub">100+ panes</span></button></div><button type="button" class="psq-wide" data-group="size" data-value="Not sure" aria-pressed="false" onclick="psqPick(this)"><span class="psq-wide-ico" aria-hidden="true"><span style="font-size:22px">?</span></span><span><strong>Not sure</strong><span>No problem &mdash; we&rsquo;ll figure it out with you on the call.</span></span><span class="psq-check" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span></button><div class="psq-estimate" id="psq-estimate" role="status"><span class="psq-estimate-ico" aria-hidden="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2Q12 12 22 12Q12 12 12 22Q12 12 2 12Q12 12 12 2Z" fill="#fac544"/></svg></span><span id="psq-estimate-text"></span></div><div class="psq-err" id="psq-err-size" role="alert"></div></div><div class="psq-step" data-key="wintype" role="group" aria-labelledby="psq-h-wintype"><div class="psq-step-head"><h2 class="psq-h" id="psq-h-wintype" tabindex="-1">Which window <span class="tc-hl">cleaning</span>?</h2><p class="psq-sub">Pick how much we cover &mdash; not sure? We&rsquo;ll help you pick on the call.</p></div><div class="psq-grid psq-grid--3"><button type="button" class="psq-card psq-card--svc" data-group="wintype" data-value="Exterior Only" aria-pressed="false" onclick="psqPick(this)"><span class="psq-check" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span><span class="psq-pic"><span class="media-frame" data-type="image" data-src="" data-alt="Exterior Only"><span class="media-slot"><span class="media-slot-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h3l2-3h6l2 3h3a1 1 0 011 1v10a1 1 0 01-1 1H4a1 1 0 01-1-1V9a1 1 0 011-1z"/><circle cx="12" cy="13.5" r="3.8"/></svg></span><span class="media-slot-title">Exterior cleaning photo</span></span></span></span><span class="psq-card-title">Exterior Only</span><span class="psq-card-sub">Every outside window</span><ul class="psq-incl"><li>Outside glass</li><li>Frames &amp; sills</li><li class="no">Inside glass</li><li class="no">Screens &amp; tracks</li></ul></button><button type="button" class="psq-card psq-card--svc psq-card--featured" data-group="wintype" data-value="Inside &amp; Out" aria-pressed="false" onclick="psqPick(this)"><span class="psq-tag">Most popular</span><span class="psq-check" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span><span class="psq-pic"><span class="media-frame" data-type="image" data-src="" data-alt="Inside & Out"><span class="media-slot"><span class="media-slot-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h3l2-3h6l2 3h3a1 1 0 011 1v10a1 1 0 01-1 1H4a1 1 0 01-1-1V9a1 1 0 011-1z"/><circle cx="12" cy="13.5" r="3.8"/></svg></span><span class="media-slot-title">Inside &amp; out photo</span></span></span></span><span class="psq-card-title">Inside &amp; Out</span><span class="psq-card-sub">Both sides of every window</span><ul class="psq-incl"><li>Outside glass</li><li>Frames &amp; sills</li><li>Inside glass</li><li>Screens</li><li class="no">Tracks &amp; hard water</li></ul></button><button type="button" class="psq-card psq-card--svc" data-group="wintype" data-value="Full Detail" aria-pressed="false" onclick="psqPick(this)"><span class="psq-check" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span><span class="psq-pic"><span class="media-frame" data-type="image" data-src="" data-alt="Full Detail"><span class="media-slot"><span class="media-slot-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h3l2-3h6l2 3h3a1 1 0 011 1v10a1 1 0 01-1 1H4a1 1 0 01-1-1V9a1 1 0 011-1z"/><circle cx="12" cy="13.5" r="3.8"/></svg></span><span class="media-slot-title">Full detail photo</span></span></span></span><span class="psq-card-title">Full Detail</span><span class="psq-card-sub">The works, top to bottom</span><ul class="psq-incl"><li>Everything in Inside &amp; Out</li><li>Tracks detailed</li><li>Hard water spot removal</li></ul></button></div><button type="button" class="psq-wide" data-group="wintype" data-value="Not sure" aria-pressed="false" onclick="psqPick(this)"><span class="psq-wide-ico" aria-hidden="true"><span style="font-size:22px">?</span></span><span><strong>Not sure which one?</strong><span>We&rsquo;ll help you pick on the call.</span></span><span class="psq-check" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span></button><div class="psq-err" id="psq-err-wintype" role="alert"></div></div><div class="psq-step" data-key="windows" role="group" aria-labelledby="psq-h-windows"><div class="psq-step-head"><h2 class="psq-h" id="psq-h-windows" tabindex="-1">Tell us about your <span class="tc-hl">windows</span></h2><p class="psq-sub">French pane windows have a grid that splits the glass into small panes &mdash; they take extra time.</p></div><div class="psq-group"><div class="psq-group-label">Do you have French pane windows?</div><div class="psq-grid psq-grid--4"><button type="button" class="psq-card " data-group="panes" data-value="No French panes" aria-pressed="false" onclick="psqPick(this)"><span class="psq-check" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span><span class="psq-pic"><span class="media-frame" data-type="image" data-src="" data-alt="No French panes"><span class="media-slot"><span class="media-slot-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h3l2-3h6l2 3h3a1 1 0 011 1v10a1 1 0 01-1 1H4a1 1 0 01-1-1V9a1 1 0 011-1z"/><circle cx="12" cy="13.5" r="3.8"/></svg></span><span class="media-slot-title">Plain window photo</span></span></span></span><span class="psq-card-title">No French panes</span><span class="psq-card-sub">Plain, open glass</span></button><button type="button" class="psq-card " data-group="panes" data-value="Yes, a few" aria-pressed="false" onclick="psqPick(this)"><span class="psq-check" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span><span class="psq-pic"><span class="media-frame" data-type="image" data-src="" data-alt="Yes, a few"><span class="media-slot"><span class="media-slot-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h3l2-3h6l2 3h3a1 1 0 011 1v10a1 1 0 01-1 1H4a1 1 0 01-1-1V9a1 1 0 011-1z"/><circle cx="12" cy="13.5" r="3.8"/></svg></span><span class="media-slot-title">French pane photo</span></span></span></span><span class="psq-card-title">Yes, a few</span><span class="psq-card-sub">Less than 25% of windows</span></button><button type="button" class="psq-card " data-group="panes" data-value="Yes, about half" aria-pressed="false" onclick="psqPick(this)"><span class="psq-check" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span><span class="psq-pic"><span class="media-frame" data-type="image" data-src="" data-alt="Yes, about half"><span class="media-slot"><span class="media-slot-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h3l2-3h6l2 3h3a1 1 0 011 1v10a1 1 0 01-1 1H4a1 1 0 01-1-1V9a1 1 0 011-1z"/><circle cx="12" cy="13.5" r="3.8"/></svg></span><span class="media-slot-title">French pane photo</span></span></span></span><span class="psq-card-title">Yes, about half</span><span class="psq-card-sub">Around 50% of windows</span></button><button type="button" class="psq-card " data-group="panes" data-value="Yes, all of them" aria-pressed="false" onclick="psqPick(this)"><span class="psq-check" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span><span class="psq-pic"><span class="media-frame" data-type="image" data-src="" data-alt="Yes, all of them"><span class="media-slot"><span class="media-slot-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h3l2-3h6l2 3h3a1 1 0 011 1v10a1 1 0 01-1 1H4a1 1 0 01-1-1V9a1 1 0 011-1z"/><circle cx="12" cy="13.5" r="3.8"/></svg></span><span class="media-slot-title">French pane photo</span></span></span></span><span class="psq-card-title">Yes, all of them</span><span class="psq-card-sub">Every window has a grid</span></button></div><button type="button" class="psq-wide" data-group="panes" data-value="Not sure" aria-pressed="false" onclick="psqPick(this)"><span class="psq-wide-ico" aria-hidden="true"><span style="font-size:22px">?</span></span><span><strong>Not sure</strong><span>We&rsquo;ll ask you a couple of quick questions on the call.</span></span><span class="psq-check" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span></button></div><div class="psq-group"><div class="psq-group-label">Hard water spots on the glass? <span>(optional)</span></div><div class="psq-chips"><button type="button" class="psq-chip" data-group="hard" data-value="No" aria-pressed="false" onclick="psqPick(this)">No</button><button type="button" class="psq-chip" data-group="hard" data-value="Yes, a few spots" aria-pressed="false" onclick="psqPick(this)">Yes, a few spots</button><button type="button" class="psq-chip" data-group="hard" data-value="Yes, a lot" aria-pressed="false" onclick="psqPick(this)">Yes, a lot</button><button type="button" class="psq-chip" data-group="hard" data-value="Not sure" aria-pressed="false" onclick="psqPick(this)">Not sure</button></div></div><div class="psq-group"><div class="psq-group-label">When were they last professionally cleaned? <span>(optional)</span></div><div class="psq-chips"><button type="button" class="psq-chip" data-group="last" data-value="Never" aria-pressed="false" onclick="psqPick(this)">Never</button><button type="button" class="psq-chip" data-group="last" data-value="New construction" aria-pressed="false" onclick="psqPick(this)">New construction</button><button type="button" class="psq-chip" data-group="last" data-value="Less than a year ago" aria-pressed="false" onclick="psqPick(this)">Less than a year ago</button><button type="button" class="psq-chip" data-group="last" data-value="1–2 years ago" aria-pressed="false" onclick="psqPick(this)">1–2 years ago</button><button type="button" class="psq-chip" data-group="last" data-value="3–5 years ago" aria-pressed="false" onclick="psqPick(this)">3–5 years ago</button><button type="button" class="psq-chip" data-group="last" data-value="Not sure" aria-pressed="false" onclick="psqPick(this)">Not sure</button></div></div><div class="psq-err" id="psq-err-windows" role="alert"></div></div><div class="psq-step" data-key="details" role="group" aria-labelledby="psq-h-details"><div class="psq-step-head"><h2 class="psq-h" id="psq-h-details" tabindex="-1">A few quick <span class="tc-hl">details</span></h2><p class="psq-sub">All optional &mdash; it just helps us have your price ready when we call.</p></div><div class="psq-group psq-detail" data-for="Pressure washing" hidden><div class="psq-group-label">Pressure washing &mdash; what should we wash? <span>(pick any)</span></div><div class="psq-chips"><button type="button" class="psq-chip" data-group="d_pressure" data-value="Driveway" data-multi="1" aria-pressed="false" onclick="psqPick(this)">Driveway</button><button type="button" class="psq-chip" data-group="d_pressure" data-value="Patio" data-multi="1" aria-pressed="false" onclick="psqPick(this)">Patio</button><button type="button" class="psq-chip" data-group="d_pressure" data-value="Pool deck" data-multi="1" aria-pressed="false" onclick="psqPick(this)">Pool deck</button><button type="button" class="psq-chip" data-group="d_pressure" data-value="Walkways" data-multi="1" aria-pressed="false" onclick="psqPick(this)">Walkways</button><button type="button" class="psq-chip" data-group="d_pressure" data-value="Pavers" data-multi="1" aria-pressed="false" onclick="psqPick(this)">Pavers</button><button type="button" class="psq-chip" data-group="d_pressure" data-value="Not sure" data-multi="1" aria-pressed="false" onclick="psqPick(this)">Not sure</button></div></div><div class="psq-group psq-detail" data-for="Solar panel cleaning" hidden><div class="psq-group-label">Solar panels &mdash; about how many?</div><div class="psq-chips"><button type="button" class="psq-chip" data-group="d_solar" data-value="1–10 panels" aria-pressed="false" onclick="psqPick(this)">1–10 panels</button><button type="button" class="psq-chip" data-group="d_solar" data-value="11–20 panels" aria-pressed="false" onclick="psqPick(this)">11–20 panels</button><button type="button" class="psq-chip" data-group="d_solar" data-value="21–30 panels" aria-pressed="false" onclick="psqPick(this)">21–30 panels</button><button type="button" class="psq-chip" data-group="d_solar" data-value="31+ panels" aria-pressed="false" onclick="psqPick(this)">31+ panels</button><button type="button" class="psq-chip" data-group="d_solar" data-value="Not sure" aria-pressed="false" onclick="psqPick(this)">Not sure</button></div></div><div class="psq-group psq-detail" data-for="Gutter cleaning" hidden><div class="psq-group-label">Gutters &mdash; how tall is the home?</div><div class="psq-chips"><button type="button" class="psq-chip" data-group="d_gutter" data-value="1 story" aria-pressed="false" onclick="psqPick(this)">1 story</button><button type="button" class="psq-chip" data-group="d_gutter" data-value="2 stories" aria-pressed="false" onclick="psqPick(this)">2 stories</button><button type="button" class="psq-chip" data-group="d_gutter" data-value="3+ stories" aria-pressed="false" onclick="psqPick(this)">3+ stories</button><button type="button" class="psq-chip" data-group="d_gutter" data-value="Not sure" aria-pressed="false" onclick="psqPick(this)">Not sure</button></div></div><div class="psq-group psq-detail" data-for="Soft washing" hidden><div class="psq-group-label">Soft washing &mdash; what needs it? <span>(pick any)</span></div><div class="psq-chips"><button type="button" class="psq-chip" data-group="d_soft" data-value="Stucco or siding" data-multi="1" aria-pressed="false" onclick="psqPick(this)">Stucco or siding</button><button type="button" class="psq-chip" data-group="d_soft" data-value="Roof" data-multi="1" aria-pressed="false" onclick="psqPick(this)">Roof</button><button type="button" class="psq-chip" data-group="d_soft" data-value="Block walls or fences" data-multi="1" aria-pressed="false" onclick="psqPick(this)">Block walls or fences</button><button type="button" class="psq-chip" data-group="d_soft" data-value="Not sure" data-multi="1" aria-pressed="false" onclick="psqPick(this)">Not sure</button></div></div><div class="psq-group psq-detail" data-for="Holiday light installation" hidden><div class="psq-group-label">Holiday lights &mdash; what should we light up? <span>(pick any)</span></div><div class="psq-chips"><button type="button" class="psq-chip" data-group="d_lights" data-value="Roofline" data-multi="1" aria-pressed="false" onclick="psqPick(this)">Roofline</button><button type="button" class="psq-chip" data-group="d_lights" data-value="Trees" data-multi="1" aria-pressed="false" onclick="psqPick(this)">Trees</button><button type="button" class="psq-chip" data-group="d_lights" data-value="Bushes" data-multi="1" aria-pressed="false" onclick="psqPick(this)">Bushes</button><button type="button" class="psq-chip" data-group="d_lights" data-value="Windows &amp; doors" data-multi="1" aria-pressed="false" onclick="psqPick(this)">Windows &amp; doors</button><button type="button" class="psq-chip" data-group="d_lights" data-value="Not sure" data-multi="1" aria-pressed="false" onclick="psqPick(this)">Not sure</button></div></div><div class="psq-err" id="psq-err-details" role="alert"></div></div><div class="psq-step" data-key="plan" role="group" aria-labelledby="psq-h-plan"><div class="psq-step-head"><h2 class="psq-h" id="psq-h-plan" tabindex="-1">Want to <span class="tc-hl">save</span> every visit?</h2><p class="psq-sub">Optional &mdash; window cleaning members save on every cleaning. We&rsquo;ll go over it all on the call.</p></div><div class="psq-grid psq-grid--3"><button type="button" class="psq-card psq-plan psq-card--featured" data-group="plan" data-value="Monthly" aria-pressed="false" onclick="psqPick(this)"><span class="psq-tag">&#9733; Best value</span><span class="psq-check" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span><span class="psq-plan-name">Monthly</span><span class="psq-plan-off">$150 OFF</span><span class="psq-plan-per">Every window cleaning</span><ul class="psq-incl"><li>12 cleanings a year</li><li>We schedule every visit</li><li class="b">Shine Guard Pro Tech</li><li class="b">7-Day Rain Guarantee</li><li class="b">Hard water removal</li></ul></button><button type="button" class="psq-card psq-plan" data-group="plan" data-value="Quarterly" aria-pressed="false" onclick="psqPick(this)"><span class="psq-check" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span><span class="psq-plan-name">Quarterly</span><span class="psq-plan-off">$100 OFF</span><span class="psq-plan-per">Every window cleaning</span><ul class="psq-incl"><li>4 cleanings a year</li><li>We schedule every visit</li><li class="b">Shine Guard Pro Tech</li><li class="b">7-Day Rain Guarantee</li><li class="b">Hard water removal</li></ul></button><button type="button" class="psq-card psq-plan" data-group="plan" data-value="Biannual" aria-pressed="false" onclick="psqPick(this)"><span class="psq-check" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span><span class="psq-plan-name">Biannual</span><span class="psq-plan-off">$50 OFF</span><span class="psq-plan-per">Every window cleaning</span><ul class="psq-incl"><li>2 cleanings a year</li><li>We schedule every visit</li><li class="no">Shine Guard Pro Tech</li><li class="no">7-Day Rain Guarantee</li><li class="no">Hard water removal</li></ul></button></div><button type="button" class="psq-wide" data-group="plan" data-value="Not sure yet" aria-pressed="false" onclick="psqPick(this)"><span class="psq-wide-ico" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.8 19.8 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.8 19.8 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72c.13.96.36 1.9.7 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.91.34 1.85.57 2.81.7A2 2 0 0122 16.92z"/></svg></span><span><strong>Not sure yet</strong><span>Tell me about memberships on the call.</span></span><span class="psq-check" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span></button><button type="button" class="psq-wide" data-group="plan" data-value="One-time" aria-pressed="false" onclick="psqPick(this)"><span class="psq-wide-ico" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/><path d="M12 13v5"/></svg></span><span><strong>Just a one-time cleaning</strong><span>No membership for now.</span></span><span class="psq-check" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span></button><div class="psq-err" id="psq-err-plan" role="alert"></div></div><div class="psq-step" data-key="address" role="group" aria-labelledby="psq-h-address"><div class="psq-step-head"><h2 class="psq-h" id="psq-h-address" tabindex="-1">Where should we <span class="tc-hl">come</span>?</h2><p class="psq-sub">Last step! We&rsquo;ll call you to go over your exact price.</p></div><div class="psq-fields"><div class="psq-field full"><svg class="psq-ico" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a7 7 0 0 0-7 7c0 5 7 13 7 13s7-8 7-13a7 7 0 0 0-7-7zm0 9.5A2.5 2.5 0 1 1 12 6.5a2.5 2.5 0 0 1 0 5z"/></svg><input id="psq-address" type="text" placeholder="Street address" aria-label="Street address" autocomplete="street-address"/></div><div class="psq-field no-ico"><input id="psq-city" type="text" placeholder="City" aria-label="City" autocomplete="address-level2"/></div><div class="psq-field no-ico"><input id="psq-zip" type="text" placeholder="Zip code" aria-label="Zip code" inputmode="numeric" autocomplete="postal-code" maxlength="5"/></div></div><div class="psq-fields psq-fields--extra"><div class="psq-field"><svg class="psq-ico" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M3 10v4a1 1 0 0 0 1 1h2l5 4V5L6 9H4a1 1 0 0 0-1 1zM14 8.5v7a4 4 0 0 0 0-7zM17 4.5v2a6 6 0 0 1 0 11v2a8 8 0 0 0 0-15z"/></svg><select id="psq-hear" class="is-empty" aria-label="How you heard about us" onchange="this.classList.toggle('is-empty', !this.value)"><option value="">How did you hear about us? (optional)</option><option>Google search</option><option>Google Maps / reviews</option><option>Instagram</option><option>Facebook</option><option>Nextdoor</option><option>Friend or neighbor</option><option>Saw the truck</option><option>Returning customer</option><option>Other</option></select></div><div class="psq-field"><svg class="psq-ico" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M2 7a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v3a2 2 0 0 0 0 4v3a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2v-3a2 2 0 0 0 0-4z"/><rect x="7" y="9" width="10" height="6" rx="1" fill="#fff"/></svg><input id="psq-code" type="text" placeholder="Promo or referral code (optional)" aria-label="Promo or referral code (optional)" autocomplete="off"/></div></div><div class="psq-group"><div class="psq-group-label">Best time to call you?</div><div class="psq-chips"><button type="button" class="psq-chip is-on" data-group="time" data-value="Anytime" aria-pressed="true" onclick="psqPick(this)">Anytime</button><button type="button" class="psq-chip" data-group="time" data-value="Morning" aria-pressed="false" onclick="psqPick(this)">Morning</button><button type="button" class="psq-chip" data-group="time" data-value="Afternoon" aria-pressed="false" onclick="psqPick(this)">Afternoon</button><button type="button" class="psq-chip" data-group="time" data-value="Evening" aria-pressed="false" onclick="psqPick(this)">Evening</button></div></div><div class="psq-group"><div class="psq-group-label">Your quote call details</div><div class="psq-review" id="psq-review"></div></div><div class="psq-err" id="psq-err-address" role="alert"></div></div><div class="psq-step" data-key="done" role="group" aria-labelledby="psq-h-done"><div class="psq-done"><div class="psq-done-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></div><h2 class="psq-h" id="psq-h-done" tabindex="-1">You&rsquo;re all set!</h2><p class="psq-done-msg" id="psq-done-msg">We&rsquo;ll call you soon with your exact price.</p><div class="psq-callout">&#128222; Save our number so you know it&rsquo;s us: <a href="tel:6025589990">(602) 558-9990</a></div><div class="tq-photo-box"><h3>Want a faster, more exact quote?</h3><p>Add a few photos (optional).</p><div class="tq-photos"><label class="tq-photo" data-slot="0"><input type="file" accept="image/*" onchange="psqPhoto(this,0)" aria-label="Add photo: Front of your home" /><span class="tq-photo-plus"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1z"/><circle cx="12" cy="13" r="3.5"/></svg></span><span class="tq-photo-label">Front of your home</span><img alt="" hidden /><span class="tq-photo-tag" hidden>Front of your home</span><button type="button" class="tq-photo-x" onclick="psqPhotoRemove(event,0)" aria-label="Remove photo">&#215;</button></label><label class="tq-photo" data-slot="1"><input type="file" accept="image/*" onchange="psqPhoto(this,1)" aria-label="Add photo: Back of your home" /><span class="tq-photo-plus"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1z"/><circle cx="12" cy="13" r="3.5"/></svg></span><span class="tq-photo-label">Back of your home</span><img alt="" hidden /><span class="tq-photo-tag" hidden>Back of your home</span><button type="button" class="tq-photo-x" onclick="psqPhotoRemove(event,1)" aria-label="Remove photo">&#215;</button></label><label class="tq-photo" data-slot="2"><input type="file" accept="image/*" onchange="psqPhoto(this,2)" aria-label="Add photo: Close-up of a problem area" /><span class="tq-photo-plus"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1z"/><circle cx="12" cy="13" r="3.5"/></svg></span><span class="tq-photo-label">Close-up of a problem area</span><img alt="" hidden /><span class="tq-photo-tag" hidden>Close-up of a problem area</span><button type="button" class="tq-photo-x" onclick="psqPhotoRemove(event,2)" aria-label="Remove photo">&#215;</button></label><label class="tq-photo" data-slot="3"><input type="file" accept="image/*" onchange="psqPhoto(this,3)" aria-label="Add photo: Anything else" /><span class="tq-photo-plus"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1z"/><circle cx="12" cy="13" r="3.5"/></svg></span><span class="tq-photo-label">Anything else</span><img alt="" hidden /><span class="tq-photo-tag" hidden>Anything else</span><button type="button" class="tq-photo-x" onclick="psqPhotoRemove(event,3)" aria-label="Remove photo">&#215;</button></label></div><div class="tq-photo-help" id="psq-photo-help">Tap a box to take a photo or choose one from your phone.</div><button type="button" class="tq-photo-send" id="psq-photo-send" onclick="psqSendPhotos()" hidden>Send my photos</button></div><div class="psq-callout">&#11088; See why neighbors rate us 5.0 &mdash; <a href="https://www.google.com/search?q=Prime+Shine+USA+Window+Washing+Phoenix" target="_blank" rel="noopener">read our Google reviews</a></div><div class="psq-done-actions"><button type="button" class="psq-next" onclick="closeQuoteModal()">Done</button></div></div></div>
+          <div class="psq-step is-active" data-key="services" role="group" aria-labelledby="psq-h-services"><div class="psq-step-head"><h2 class="psq-h" id="psq-h-services" tabindex="-1">What would you like <span class="tc-hl">cleaned</span>?</h2><p class="psq-sub">Free quote in 30 seconds &mdash; we&rsquo;ll call you with your exact price.</p></div><button type="button" class="psq-hero" data-group="services" data-value="Window cleaning" data-multi="1" aria-pressed="false" onclick="psqPick(this)"><span class="psq-check" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span><span class="psq-pic psq-hero-pic"><span class="media-frame" data-type="image" data-src="" data-alt="Window cleaning"><span class="media-slot"><span class="media-slot-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h3l2-3h6l2 3h3a1 1 0 011 1v10a1 1 0 01-1 1H4a1 1 0 01-1-1V9a1 1 0 011-1z"/><circle cx="12" cy="13.5" r="3.8"/></svg></span><span class="media-slot-title">Window cleaning photo</span></span></span></span><span class="psq-hero-body"><span class="psq-tag psq-tag--inline">&#9733; Most popular</span><span class="psq-hero-title">Window Cleaning</span><span class="psq-hero-sub">Streak-free glass, inside and out.</span><span class="psq-hero-points"><span>100% satisfaction guarantee</span><span>Screens, tracks &amp; sills too</span></span></span></button><div class="psq-group"><div class="psq-group-label">Add anything else? <span>(optional)</span></div><div class="psq-extras"><button type="button" class="psq-extra" data-group="services" data-value="Pressure washing" data-multi="1" aria-pressed="false" onclick="psqPick(this)"><span class="psq-extra-ico"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 9h7l1.5 2.5H8V17H5v-5.5H3z"/><path d="M11.5 10.5h3"/><path d="M16 8l5-2.5M16 10.5h5.5M16 13l5 2.5"/><path d="M2 21h20"/></svg></span><span class="psq-extra-name">Pressure washing</span><span class="psq-check" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span></button><button type="button" class="psq-extra" data-group="services" data-value="Solar panel cleaning" data-multi="1" aria-pressed="false" onclick="psqPick(this)"><span class="psq-extra-ico"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 20l3-11h15l-3 11z"/><path d="M4.5 14.5h15M10 9l-3 11M15 9l-3 11"/><circle cx="5" cy="4" r="2"/></svg></span><span class="psq-extra-name">Solar panels</span><span class="psq-check" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span></button><button type="button" class="psq-extra" data-group="services" data-value="Gutter cleaning" data-multi="1" aria-pressed="false" onclick="psqPick(this)"><span class="psq-extra-ico"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 6h20v3a2 2 0 01-2 2H4a2 2 0 01-2-2z"/><path d="M17 11v7a2 2 0 002 2h3"/><path d="M7 15.5c0-1.5 1.5-3 1.5-3s1.5 1.5 1.5 3a1.5 1.5 0 01-3 0z"/></svg></span><span class="psq-extra-name">Gutter cleaning</span><span class="psq-check" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span></button><button type="button" class="psq-extra" data-group="services" data-value="Soft washing" data-multi="1" aria-pressed="false" onclick="psqPick(this)"><span class="psq-extra-ico"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11L12 4l9 7"/><path d="M5 9.5V20h14V9.5"/><path d="M9 14c2-1.5 4-1.5 6 0M9 17.5c2-1.5 4-1.5 6 0"/></svg></span><span class="psq-extra-name">Soft washing</span><span class="psq-check" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span></button><button type="button" class="psq-extra" data-group="services" data-value="Holiday light installation" data-multi="1" aria-pressed="false" onclick="psqPick(this)"><span class="psq-extra-ico"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 5c6 4 14 4 20 0"/><path d="M6 7.5v2M12 8.5v2M18 7.5v2"/><path d="M6 9.5c-1.3 1.3-1.3 3.4 0 4.3 1.3-.9 1.3-3 0-4.3zM12 10.5c-1.3 1.3-1.3 3.4 0 4.3 1.3-.9 1.3-3 0-4.3zM18 9.5c-1.3 1.3-1.3 3.4 0 4.3 1.3-.9 1.3-3 0-4.3z"/></svg></span><span class="psq-extra-name">Holiday lights</span><span class="psq-check" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span></button></div></div><div class="psq-err" id="psq-err-services" role="alert"></div></div><div class="psq-step" data-key="place" role="group" aria-labelledby="psq-h-place"><div class="psq-step-head"><h2 class="psq-h" id="psq-h-place" tabindex="-1">What kind of <span class="tc-hl">place</span>?</h2><p class="psq-sub">Tap one.</p></div><div class="psq-grid psq-grid--3"><button type="button" class="psq-card " data-group="place" data-value="House" aria-pressed="false" onclick="psqPick(this)"><span class="psq-check" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span><span class="psq-pic"><span class="media-frame" data-type="image" data-src="" data-alt="House"><span class="media-slot"><span class="media-slot-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h3l2-3h6l2 3h3a1 1 0 011 1v10a1 1 0 01-1 1H4a1 1 0 01-1-1V9a1 1 0 011-1z"/><circle cx="12" cy="13.5" r="3.8"/></svg></span><span class="media-slot-title">House photo</span></span></span></span><span class="psq-card-title">House</span><span class="psq-card-sub">Single or multi-level home</span></button><button type="button" class="psq-card " data-group="place" data-value="Townhome or condo" aria-pressed="false" onclick="psqPick(this)"><span class="psq-check" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span><span class="psq-pic"><span class="media-frame" data-type="image" data-src="" data-alt="Townhome or condo"><span class="media-slot"><span class="media-slot-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h3l2-3h6l2 3h3a1 1 0 011 1v10a1 1 0 01-1 1H4a1 1 0 01-1-1V9a1 1 0 011-1z"/><circle cx="12" cy="13.5" r="3.8"/></svg></span><span class="media-slot-title">Townhome photo</span></span></span></span><span class="psq-card-title">Townhome or condo</span><span class="psq-card-sub">Attached home or a unit</span></button><button type="button" class="psq-card " data-group="place" data-value="Business" aria-pressed="false" onclick="psqPick(this)"><span class="psq-check" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span><span class="psq-pic"><span class="media-frame" data-type="image" data-src="" data-alt="Business"><span class="media-slot"><span class="media-slot-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h3l2-3h6l2 3h3a1 1 0 011 1v10a1 1 0 01-1 1H4a1 1 0 01-1-1V9a1 1 0 011-1z"/><circle cx="12" cy="13.5" r="3.8"/></svg></span><span class="media-slot-title">Business photo</span></span></span></span><span class="psq-card-title">Business</span><span class="psq-card-sub">Storefront, office or building</span></button></div><div class="psq-err" id="psq-err-place" role="alert"></div></div><div class="psq-step" data-key="stories" role="group" aria-labelledby="psq-h-stories"><div class="psq-step-head"><h2 class="psq-h" id="psq-h-stories" tabindex="-1">How many <span class="tc-hl">stories</span>?</h2><p class="psq-sub">Tap one.</p></div><div class="psq-grid psq-grid--3"><button type="button" class="psq-card psq-card--num" data-group="stories" data-value="1 story" aria-pressed="false" onclick="psqPick(this)"><span class="psq-check" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span><span class="psq-pic"><span class="psq-num">1</span></span><span class="psq-card-title">1 story</span><span class="psq-card-sub">Single level</span></button><button type="button" class="psq-card psq-card--num" data-group="stories" data-value="2 stories" aria-pressed="false" onclick="psqPick(this)"><span class="psq-check" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span><span class="psq-pic"><span class="psq-num">2</span></span><span class="psq-card-title">2 stories</span><span class="psq-card-sub">Two levels</span></button><button type="button" class="psq-card psq-card--num" data-group="stories" data-value="3+ stories" aria-pressed="false" onclick="psqPick(this)"><span class="psq-check" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span><span class="psq-pic"><span class="psq-num">3+</span></span><span class="psq-card-title">3+ stories</span><span class="psq-card-sub">Three or more</span></button></div><button type="button" class="psq-skip" onclick="psqSet('stories', 'Not sure'); psqNext();">Not sure? Skip this</button><div class="psq-err" id="psq-err-stories" role="alert"></div></div><div class="psq-step" data-key="contact" role="group" aria-labelledby="psq-h-contact"><div class="psq-step-head"><h2 class="psq-h" id="psq-h-contact" tabindex="-1">Where should we <span class="tc-hl">call</span> you?</h2><p class="psq-sub">Last step! We&rsquo;ll call you with your exact price &mdash; no obligation.</p></div><div class="psq-recap" id="psq-recap"></div><div class="psq-fields"><div class="psq-field"><svg class="psq-ico" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="12" cy="7.5" r="4.5"/><path d="M3 21c0-5 4-8 9-8s9 3 9 8z"/></svg><input id="psq-name" type="text" placeholder="Your name" aria-label="Your name" autocomplete="name"/></div><div class="psq-field"><svg class="psq-ico" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6.6 10.8a15.1 15.1 0 0 0 6.6 6.6l2.2-2.2a1 1 0 0 1 1-.25 11.4 11.4 0 0 0 3.6.57 1 1 0 0 1 1 1V20a1 1 0 0 1-1 1A17 17 0 0 1 3 4a1 1 0 0 1 1-1h3.5a1 1 0 0 1 1 1c0 1.25.2 2.45.57 3.6a1 1 0 0 1-.25 1z"/></svg><input id="psq-phone" type="tel" placeholder="Mobile phone" aria-label="Mobile phone" inputmode="tel" autocomplete="tel"/></div></div><div class="psq-fields psq-fields--addr"><div class="psq-field"><svg class="psq-ico" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a7 7 0 0 0-7 7c0 5 7 13 7 13s7-8 7-13a7 7 0 0 0-7-7zm0 9.5A2.5 2.5 0 1 1 12 6.5a2.5 2.5 0 0 1 0 5z"/></svg><input id="psq-address" type="text" placeholder="Street address, city" aria-label="Street address, city" autocomplete="street-address"/></div><div class="psq-field no-ico"><input id="psq-zip" type="text" placeholder="ZIP code" aria-label="ZIP code" inputmode="numeric" autocomplete="postal-code" maxlength="5"/></div></div><div class="psq-trust"><span>100% free</span><span>No obligation</span><span>Just one quick call</span><span>5.0 stars on Google</span></div><div class="psq-consent"><label class="psq-checkline"><input type="checkbox" id="psq-texts" /> <span>Text me Prime Shine USA deals and seasonal offers (optional).</span></label><p class="psq-fine">About 2&ndash;4 texts a month if you check the box; not required to book. Msg &amp; data rates may apply. Reply STOP to opt out, HELP for help. By tapping Get My Free Quote, you agree Prime Shine USA may call or text you about your quote. See our <a href="privacy.html" target="_blank" rel="noopener">Privacy Policy</a> and <a href="terms.html" target="_blank" rel="noopener">Terms</a>.</p></div><div class="psq-err" id="psq-err-contact" role="alert"></div></div><div class="psq-step" data-key="done" role="group" aria-labelledby="psq-h-done"><div class="psq-done"><div class="psq-done-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></div><h2 class="psq-h" id="psq-h-done" tabindex="-1">You&rsquo;re all set!</h2><p class="psq-done-msg" id="psq-done-msg">We&rsquo;ll call you soon with your exact price.</p><div class="psq-callout">&#128222; Save our number so you know it&rsquo;s us: <a href="tel:6025589990">(602) 558-9990</a></div><div class="tq-photo-box"><h3>Want a faster, more exact quote?</h3><p>Add a few photos (optional).</p><div class="tq-photos"><label class="tq-photo" data-slot="0"><input type="file" accept="image/*" onchange="psqPhoto(this,0)" aria-label="Add photo: Front of your home" /><span class="tq-photo-plus"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1z"/><circle cx="12" cy="13" r="3.5"/></svg></span><span class="tq-photo-label">Front of your home</span><img alt="" hidden /><span class="tq-photo-tag" hidden>Front of your home</span><button type="button" class="tq-photo-x" onclick="psqPhotoRemove(event,0)" aria-label="Remove photo">&#215;</button></label><label class="tq-photo" data-slot="1"><input type="file" accept="image/*" onchange="psqPhoto(this,1)" aria-label="Add photo: Back of your home" /><span class="tq-photo-plus"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1z"/><circle cx="12" cy="13" r="3.5"/></svg></span><span class="tq-photo-label">Back of your home</span><img alt="" hidden /><span class="tq-photo-tag" hidden>Back of your home</span><button type="button" class="tq-photo-x" onclick="psqPhotoRemove(event,1)" aria-label="Remove photo">&#215;</button></label><label class="tq-photo" data-slot="2"><input type="file" accept="image/*" onchange="psqPhoto(this,2)" aria-label="Add photo: Close-up of a problem area" /><span class="tq-photo-plus"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1z"/><circle cx="12" cy="13" r="3.5"/></svg></span><span class="tq-photo-label">Close-up of a problem area</span><img alt="" hidden /><span class="tq-photo-tag" hidden>Close-up of a problem area</span><button type="button" class="tq-photo-x" onclick="psqPhotoRemove(event,2)" aria-label="Remove photo">&#215;</button></label><label class="tq-photo" data-slot="3"><input type="file" accept="image/*" onchange="psqPhoto(this,3)" aria-label="Add photo: Anything else" /><span class="tq-photo-plus"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1z"/><circle cx="12" cy="13" r="3.5"/></svg></span><span class="tq-photo-label">Anything else</span><img alt="" hidden /><span class="tq-photo-tag" hidden>Anything else</span><button type="button" class="tq-photo-x" onclick="psqPhotoRemove(event,3)" aria-label="Remove photo">&#215;</button></label></div><div class="tq-photo-help" id="psq-photo-help">Tap a box to take a photo or choose one from your phone.</div><button type="button" class="tq-photo-send" id="psq-photo-send" onclick="psqSendPhotos()" hidden>Send my photos</button></div><div class="psq-callout">&#11088; See why neighbors rate us 5.0 &mdash; <a href="https://www.google.com/search?q=Prime+Shine+USA+Window+Washing+Phoenix" target="_blank" rel="noopener">read our Google reviews</a></div><div class="psq-done-actions"><button type="button" class="psq-next" onclick="closeQuoteModal()">Done</button></div></div></div>
         </form>
       </div>
       <div class="psq-actions" id="psq-actions"><div class="psq-actions-in">
@@ -3877,7 +3968,6 @@
         <button type="button" class="psq-next" id="psq-next" onclick="psqNext()"><span id="psq-next-label">Next</span> &rarr;</button>
       </div></div>
       </div>
-      <aside class="psq-side" aria-label="Your quote so far"><div class="psq-sum"><div class="psq-sum-head"><img src="logo-square.png" alt="" /><div><div class="psq-sum-title">Your quote call</div><div class="psq-sum-sub">Fills in as you go</div></div></div><div id="psq-sum-rows"></div></div><div class="psq-howto"><div class="psq-howto-title">What happens next</div><ol><li><span>1</span><div><strong>Tell us what you need</strong>About a minute, right here.</div></li><li><span>2</span><div><strong>We call you</strong>With your exact price &mdash; and answer any questions.</div></li><li><span>3</span><div><strong>Your home shines</strong>100% satisfaction guaranteed.</div></li></ol></div><a class="psq-side-call" href="tel:6025589990"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.8 19.8 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.8 19.8 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72c.13.96.36 1.9.7 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.91.34 1.85.57 2.81.7A2 2 0 0122 16.92z"/></svg><span>Rather talk now?<strong>(602) 558-9990</strong></span></a></aside>
     </div>
     <iframe name="psq-sink" id="psq-sink" title="Photo upload" tabindex="-1" aria-hidden="true" style="display:none;"></iframe>
   </div>
@@ -3885,60 +3975,49 @@
 
 <!-- ─── JAVASCRIPT ─────────────────────────────────────────────────── -->
 <script>
-  /* ── Quote builder: quick picture steps, then Prime Shine calls with the price. No prices are ever shown here.
-     Steps adapt to what they pick: window questions only for window cleaning, quick details only for the other services. ── */
+  /* ── Quote builder: 4 super-simple steps (what · place · stories · where to call), then Prime Shine calls with the price.
+     No prices are ever shown here. Window cleaning is picked by default so most people just tap Next. ── */
   var PSQ_EMAIL = 'primeshineusacare@gmail.com';
   var PSQ_PHONE = '(602) 558-9990';
   var PSQ_WIN = 'Window cleaning';
   var PSQ_STEPS = [
-    { key: 'you', label: 'You', title: 'Your free quote' },
-    { key: 'services', label: 'Services', title: 'What you need' },
-    { key: 'property', label: 'Property', title: 'Your property' },
-    { key: 'size', label: 'Size', title: 'Size' },
-    { key: 'wintype', label: 'Window type', title: 'Window cleaning', win: true },
-    { key: 'windows', label: 'Windows', title: 'Your windows', win: true },
-    { key: 'details', label: 'Details', title: 'Quick details', other: true },
-    { key: 'plan', label: 'Plan', title: 'Membership', win: true },
-    { key: 'address', label: 'Address', title: 'Almost done' }
+    { key: 'services', title: 'What you need' },
+    { key: 'place', title: 'Your place' },
+    { key: 'stories', title: 'Stories' },
+    { key: 'contact', title: 'Almost done' }
   ];
-  var PSQ_DETAILS = [  // service → [details group, label in summary/email]
-    ['Pressure washing', 'd_pressure', 'Pressure washing'], ['Solar panel cleaning', 'd_solar', 'Solar panels'],
-    ['Gutter cleaning', 'd_gutter', 'Gutters'], ['Soft washing', 'd_soft', 'Soft washing'], ['Holiday light installation', 'd_lights', 'Holiday lights']
-  ];
-  var PSQ_PANES = { 'Under 2,500 sq ft': '0–20', '2,500–3,499 sq ft': '21–40', '3,500–4,999 sq ft': '41–60', '5,000–6,499 sq ft': '61–80', '6,500–7,999 sq ft': '81–99', '8,000+ sq ft': '100+' };
-  var PSQ_PLAN = { 'Monthly': 'Monthly — $150 off every cleaning', 'Quarterly': 'Quarterly — $100 off every cleaning', 'Biannual': 'Biannual — $50 off every cleaning',
-                   'Not sure yet': 'Not sure yet — go over memberships on the call', 'One-time': 'One-time cleaning' };
-  var PSQ_AUTO = { type: 'property', wintype: 'wintype', plan: 'plan' };   // single picks that move on by themselves
+  var PSQ_AUTO = { place: 'place', stories: 'stories' };   // one tap moves on
+  var PSQ_SHORT = { 'Holiday light installation': 'Holiday lights', 'Solar panel cleaning': 'Solar panels' };
   var PSQ_PHOTO_LABELS = ['Front of your home', 'Back of your home', 'Close-up of a problem area', 'Anything else'];
-  function psqFresh() { return { services: [], d_pressure: [], d_soft: [], d_lights: [], time: 'Anytime' }; }
-  var psq = { key: 'you', contact: null, startSentFor: '', picks: psqFresh(), photos: [null, null, null, null], photosSent: false };
+  function psqFresh() { return { services: [] }; }
+  var psq = { key: 'services', fresh: true, picks: psqFresh(), contact: null, submitted: false, partialSent: false, photos: [null, null, null, null], photosSent: false };
 
   function psqEl(id) { return document.getElementById(id); }
-  function psqVal(id) { return (psqEl(id).value || '').trim(); }
-  function psqHasWin() { return psq.picks.services.indexOf(PSQ_WIN) > -1; }
-  function psqHasOther() { return psq.picks.services.some(function (s) { return s !== PSQ_WIN; }); }
-  function psqActive() { return PSQ_STEPS.filter(function (s) { return (!s.win || psqHasWin()) && (!s.other || psqHasOther()); }); }
-  function psqIndex(key) { var a = psqActive(); for (var i = 0; i < a.length; i++) if (a[i].key === key) return i; return -1; }
+  function psqVal(id) { var e = psqEl(id); return e ? (e.value || '').trim() : ''; }
+  function psqIndex(key) { for (var i = 0; i < PSQ_STEPS.length; i++) if (PSQ_STEPS[i].key === key) return i; return -1; }
 
   function openQuoteModal(mode) {
     if (psq.key === 'done') psqReset();
     var win = { exterior: 'Exterior Only', insideout: 'Inside & Out', full: 'Full Detail' };
     var plans = { monthly: 'Monthly', quarterly: 'Quarterly', biannual: 'Biannual', onetime: 'One-time' };
     var other = { pressure: 'Pressure washing', solar: 'Solar panel cleaning', gutter: 'Gutter cleaning', softwash: 'Soft washing', lights: 'Holiday light installation' };
-    if (win[mode] || plans[mode] || mode === 'windows' || mode === 'commercial') psqSet('services', PSQ_WIN);
-    if (win[mode]) psqSet('wintype', win[mode]);
-    if (plans[mode]) psqSet('plan', plans[mode]);
+    if (win[mode]) psq.picks.wintype = win[mode];
+    if (plans[mode]) psq.picks.plan = plans[mode];
     if (other[mode]) psqSet('services', other[mode]);
-    if (mode === 'commercial') psqSet('type', 'Commercial building');
+    if (mode === 'commercial') psqSet('place', 'Business');
+    // Window cleaning is the default pick — unless they came from another service's button
+    if (psq.fresh && !other[mode]) psqSet('services', PSQ_WIN);
+    if (!psq.fresh && (win[mode] || plans[mode] || mode === 'commercial')) psqSet('services', PSQ_WIN);
+    psq.fresh = false;
     psqEl('psq').hidden = false;
     document.body.style.overflow = 'hidden';
     psqGo(psq.key, true);
-    if (psq.key === 'you' && window.innerWidth > 760) setTimeout(function () { psqEl('psq-first').focus(); }, 80);
   }
 
   function closeQuoteModal() {
     var m = psqEl('psq');
     if (!m || m.hidden) return;
+    psqPartial();
     m.hidden = true;
     document.body.style.overflow = '';
     if (psq.key === 'done') psqReset();
@@ -3946,53 +4025,47 @@
 
   function psqReset() {
     psq.photos.forEach(function (p, i) { if (p) psqPhotoRemove(null, i); });
-    psq.key = 'you'; psq.contact = null; psq.startSentFor = ''; psq.picks = psqFresh(); psq.photosSent = false;
+    psq.key = 'services'; psq.fresh = true; psq.picks = psqFresh(); psq.contact = null; psq.submitted = false; psq.partialSent = false; psq.photosSent = false;
     var f = psqEl('psq-form'); f.reset();
     f.querySelectorAll('.is-on').forEach(function (b) { b.classList.remove('is-on'); b.setAttribute('aria-pressed', 'false'); });
-    psqSet('time', 'Anytime');
     f.querySelectorAll('.is-invalid').forEach(function (x) { x.classList.remove('is-invalid'); });
-    f.querySelectorAll('select').forEach(function (s) { s.classList.toggle('is-empty', !s.value); });
     f.querySelectorAll('.psq-err').forEach(function (e) { e.textContent = ''; });
-    psqEl('psq-estimate').classList.remove('show');
     var ps = psqEl('psq-photo-send'); ps.hidden = true; ps.disabled = false; ps.textContent = 'Send my photos';
     psqPhotoHelp();
-    psqSummary();
   }
 
   function psqBtn(group, value) {
     return Array.prototype.filter.call(document.querySelectorAll('#psq-form [data-group="' + group + '"]'), function (b) { return b.getAttribute('data-value') === value; })[0];
   }
-  // Pick something without auto-advancing (and never un-pick a "pick many" choice)
+  // Pick something without auto-advancing (never un-picks a "pick many" choice)
   function psqSet(group, value) {
     var b = psqBtn(group, value);
-    if (b && !(b.hasAttribute('data-multi') && b.classList.contains('is-on'))) psqPick(b, true);
+    if (!b) { psq.picks[group] = value; return; }
+    if (!(b.hasAttribute('data-multi') && b.classList.contains('is-on'))) psqPick(b, true);
   }
 
-  function psqStepper() {
-    var act = psqActive(), done = psq.key === 'done', cur = done ? act.length : Math.max(0, psqIndex(psq.key));
-    psqEl('psq-stepper').classList.toggle('is-long', act.length > 7);  // lots of steps: only the current one keeps its name
-    psqEl('psq-stepper').innerHTML = act.map(function (s, j) {
-      var cls = j < cur ? 'is-done' : (j === cur ? 'is-current' : '');
-      return '<li class="' + cls + '"><button type="button"' + (j < cur && !done ? '' : ' disabled') + ' onclick="psqGo(\'' + s.key + '\')" aria-label="Step ' + (j + 1) + ': ' + s.label + '">' +
-             '<span class="psq-dot">' + (j + 1) + '</span><span class="psq-lbl">' + s.label + '</span></button></li>';
-    }).join('');
-    psqEl('psq-bar').style.width = (done ? 100 : (cur + 1) / act.length * 100) + '%';
-    psqEl('psq-kicker').textContent = done ? 'Request sent' : 'Step ' + (cur + 1) + ' of ' + act.length;
-    psqEl('psq-title').textContent = done ? 'All set' : act[cur].title;
+  function psqProgress() {
+    var done = psq.key === 'done', cur = done ? PSQ_STEPS.length : psqIndex(psq.key);
+    psqEl('psq-progress').innerHTML = PSQ_STEPS.map(function (s, j) { return '<i class="' + (j <= cur ? 'on' : '') + '"></i>'; }).join('');
+    psqEl('psq-kicker').textContent = done ? 'Request sent' : 'Step ' + (cur + 1) + ' of ' + PSQ_STEPS.length;
+    psqEl('psq-title').textContent = done ? 'All set' : PSQ_STEPS[cur].title;
     psqEl('psq-back').classList.toggle('is-hidden', cur <= 0 || done);
-    psqEl('psq-next-label').textContent = cur === act.length - 1 ? 'Request my quote call' : 'Next';
+    // One-tap steps don't need a Next button
+    psqEl('psq-next').classList.toggle('is-hidden', !!PSQ_AUTO[psq.key]);
+    psqEl('psq-next-label').textContent = psq.key === 'contact' ? 'Get my free quote' : 'Next';
   }
 
   function psqGo(key, instant) {
     psq.key = key;
     document.querySelectorAll('#psq-form .psq-step').forEach(function (s) { s.classList.toggle('is-active', s.getAttribute('data-key') === key); });
     psqEl('psq-actions').classList.toggle('is-hidden', key === 'done');
-    if (key === 'details') psqDetails();
-    if (key === 'size') psqEstimate();
-    if (key === 'address') psqSummary();
-    psqStepper();
+    if (key === 'contact') psqRecap();
+    psqProgress();
     psqEl('psq-main').scrollTop = 0;
-    if (!instant) { var h = document.querySelector('.psq-step.is-active .psq-h'); if (h && window.innerWidth > 760) h.focus({ preventScroll: true }); }
+    if (!instant) {
+      var target = key === 'contact' && window.innerWidth > 760 ? psqEl('psq-name') : document.querySelector('.psq-step.is-active .psq-h');
+      if (target && window.innerWidth > 760) target.focus({ preventScroll: true });
+    }
   }
 
   function psqErr(key, msg) {
@@ -4006,39 +4079,29 @@
     var all = Array.prototype.slice.call(document.querySelectorAll('#psq-form [data-group="' + group + '"]'));
     var setOn = function (b, on) { b.classList.toggle('is-on', on); b.setAttribute('aria-pressed', on ? 'true' : 'false'); };
     if (btn.hasAttribute('data-multi')) {
-      var on = !btn.classList.contains('is-on');
-      // "Not sure" and specific picks don't mix
-      if (on) all.forEach(function (b) { if ((value === 'Not sure') !== (b.getAttribute('data-value') === 'Not sure')) setOn(b, false); });
-      setOn(btn, on);
+      setOn(btn, !btn.classList.contains('is-on'));
       psq.picks[group] = all.filter(function (b) { return b.classList.contains('is-on'); }).map(function (b) { return b.getAttribute('data-value'); });
     } else {
       all.forEach(function (b) { setOn(b, b === btn); });
       psq.picks[group] = value;
     }
-    if (group === 'services') { psqDetails(); if (document.getElementById('psq-stepper')) psqStepper(); }
-    if (group === 'size') psqEstimate();
-    psqSummary();
     if (quiet) return;
     psqErr(psq.key, '');
     if (PSQ_AUTO[group] === psq.key) {
       var at = psq.key;
-      setTimeout(function () { if (psq.key === at) psqNext(); }, 550);
+      setTimeout(function () { if (psq.key === at) psqNext(); }, 450);
     }
   }
 
-  function psqDetails() {
-    document.querySelectorAll('#psq-form .psq-detail').forEach(function (g) { g.hidden = psq.picks.services.indexOf(g.getAttribute('data-for')) < 0; });
-  }
-
-  function psqEstimate() {
-    var box = psqEl('psq-estimate'), t = psqEl('psq-estimate-text'), size = psq.picks.size;
-    if (!size) { box.classList.remove('show'); return; }
-    t.innerHTML = size === 'Not sure'
-      ? 'No problem &mdash; we&rsquo;ll figure out the size with you on the call.'
-      : psqHasWin()
-        ? 'A home that size usually has about <b>' + PSQ_PANES[size] + ' window panes</b>. We&rsquo;ll confirm the exact count on your call.'
-        : 'Got it &mdash; we&rsquo;ll confirm the details with you on the call.';
-    box.classList.add('show');
+  function psqRecap() {
+    var p = psq.picks, esc = function (s) { return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;'); };
+    var bits = (p.services || []).map(function (s) { return PSQ_SHORT[s] || s; });
+    if (p.wintype) bits.push(p.wintype);
+    if (p.plan && p.plan !== 'One-time') bits.push(p.plan + ' membership');
+    if (p.place) bits.push(p.place);
+    if (p.stories && p.stories !== 'Not sure') bits.push(p.stories);
+    psqEl('psq-recap').innerHTML = bits.map(function (b) { return '<span>' + esc(b) + '</span>'; }).join('') +
+      '<button type="button" class="psq-recap-edit" onclick="psqGo(\'services\')">Change</button>';
   }
 
   function psqDigits(s) { var d = String(s).replace(/\D/g, ''); return (d.length === 11 && d.charAt(0) === '1') ? d.slice(1) : d; }
@@ -4056,59 +4119,14 @@
 
   function psqNext() {
     var k = psq.key, p = psq.picks;
-    if (k === 'you') {
-      if (!psqCheck([
-        ['psq-first', function (v) { return v.length > 0; }, 'Enter your first name.'],
-        ['psq-last', function (v) { return v.length > 0; }, 'Enter your last name.'],
-        ['psq-phone', function (v) { return psqDigits(v).length === 10; }, 'Enter a 10-digit mobile number so we can call you.'],
-        ['psq-email', function (v) { return !v || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v); }, 'That email doesn’t look right — fix it or leave it blank.']
-      ], 'you')) return;
-      var d = psqDigits(psqVal('psq-phone'));
-      psq.contact = { first_name: psqVal('psq-first'), last_name: psqVal('psq-last'), phone: psqFmtPhone(d), email: psqVal('psq-email'),
-                      texts_ok: psqEl('psq-texts').checked ? 'Yes' : 'No' };
-      // The lead goes out right away, so Prime Shine can call even if they stop here
-      if (psq.startSentFor !== d) { psq.startSentFor = d; psqSend('started').catch(function () {}); }
-    }
-    if (k === 'services' && !p.services.length) return psqErr(k, 'Pick at least one service — you can pick more than one.');
-    if (k === 'property' && !p.type) return psqErr(k, 'Pick the kind of property.');
-    if (k === 'size' && !p.size) return psqErr(k, 'Pick the closest size — or “Not sure”.');
-    if (k === 'wintype' && !p.wintype) return psqErr(k, 'Pick a window cleaning — or “Not sure which one?”.');
-    if (k === 'windows' && !p.panes) return psqErr(k, 'Tell us about French pane windows — or pick “Not sure”.');
-    if (k === 'plan' && !p.plan) psqSet('plan', 'Not sure yet');
-    if (k === 'address') return psqSubmit();
-    var act = psqActive(), i = psqIndex(k);
-    psqGo(act[i + 1].key);
+    if (k === 'services' && !(p.services || []).length) return psqErr(k, 'Pick at least one — Window Cleaning is our most popular.');
+    if (k === 'place' && !p.place) return psqErr(k, 'Tap the kind of place.');
+    if (k === 'stories' && !p.stories) return psqErr(k, 'Tap how many stories — or skip it.');
+    if (k === 'contact') return psqSubmit();
+    psqGo(PSQ_STEPS[psqIndex(k) + 1].key);
   }
 
-  function psqBack() { var act = psqActive(), i = psqIndex(psq.key); if (i > 0) psqGo(act[i - 1].key); }
-
-  // Everything they told us, in order — only what applies to the services they picked
-  function psqRows() {
-    var p = psq.picks, win = psqHasWin(), rows = [['Services', p.services.join(', '), 'services'], ['Property', p.type, 'property'], ['Home size', p.size, 'size']];
-    if (win) rows.push(['Window panes', p.size && PSQ_PANES[p.size] ? 'About ' + PSQ_PANES[p.size] : '', 'size'],
-                       ['Window cleaning', p.wintype, 'wintype'], ['French panes', p.panes, 'windows'], ['Hard water spots', p.hard, 'windows'], ['Last cleaned', p.last, 'windows']);
-    PSQ_DETAILS.forEach(function (d) {
-      if (p.services.indexOf(d[0]) < 0) return;
-      var v = p[d[1]]; rows.push([d[2], Array.isArray(v) ? v.join(', ') : (v || ''), 'details']);
-    });
-    if (win) rows.push(['Membership', p.plan, 'plan']);
-    return rows;
-  }
-
-  function psqSummary() {
-    var rows = psqRows(), esc = function (s) { return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;'); };
-    var filled = rows.filter(function (r) { return r[1]; });
-    psqEl('psq-sum-rows').innerHTML = filled.length ? filled.map(function (r) {
-      var v = r[1], gold = r[0] === 'Membership' && v !== 'Not sure yet' && v !== 'One-time';
-      return '<div class="psq-sum-row"><span class="psq-sum-k">' + r[0] + '</span><span class="psq-sum-v' + (gold ? ' gold' : '') + '">' + esc(v) + '</span></div>';
-    }).join('') : '<p class="psq-sum-empty">Your answers will show up here as you go.</p>';
-    var c = psq.contact;
-    var review = (c ? [['Name', c.first_name + ' ' + c.last_name, 'you'], ['Phone', c.phone, 'you']] : []).concat(rows);
-    psqEl('psq-review').innerHTML = review.map(function (r) {
-      return '<div class="psq-review-row"><span class="psq-review-k">' + r[0] + '</span><span class="psq-review-v' + (r[1] ? '' : ' is-empty') + '">' + (r[1] ? esc(r[1]) : 'Not given') + '</span>' +
-             '<button type="button" class="psq-edit" onclick="psqGo(\'' + r[2] + '\')">Edit</button></div>';
-    }).join('');
-  }
+  function psqBack() { var i = psqIndex(psq.key); if (i > 0) psqGo(PSQ_STEPS[i - 1].key); }
 
   // Phoenix time (no daylight saving). Hours match the footer: Mon–Sat 8am–7pm.
   function psqPhoenixNow() {
@@ -4119,51 +4137,30 @@
   }
 
   function psqDoneMessage() {
-    var now = psqPhoenixNow(), day = now.day, h = now.hour, t = psq.picks.time;
+    var now = psqPhoenixNow(), day = now.day, h = now.hour;
     var open = day !== 'Sun' && h >= 8 && h < 19;
     var nextMorning = (day === 'Sat' && h >= 19) || day === 'Sun' ? 'on Monday' : (h < 8 ? 'later this morning' : 'tomorrow');
-    var pref = t && t !== 'Anytime' ? ' We&rsquo;ll aim for the <strong>' + t.toLowerCase() + '</strong> like you asked.' : '';
-    if (open) return 'We&rsquo;re putting your quote together now. <strong>Expect a call from ' + PSQ_PHONE + ' within a few hours</strong> &mdash; we&rsquo;ll go over your exact price and answer any questions.' + pref;
-    return 'We&rsquo;re closed right now, so we&rsquo;ll call you from <strong>' + PSQ_PHONE + '</strong> ' + nextMorning + ' with your exact price.' + pref;
+    if (open) return 'We&rsquo;re putting your quote together now. <strong>Expect a call from ' + PSQ_PHONE + ' within a few hours</strong> &mdash; we&rsquo;ll go over your exact price and answer any questions.';
+    return 'We&rsquo;re closed right now, so we&rsquo;ll call you from <strong>' + PSQ_PHONE + '</strong> ' + nextMorning + ' with your exact price.';
   }
 
-  function psqAddress() { return [psqVal('psq-address'), psqVal('psq-city'), 'AZ', psqVal('psq-zip')].filter(Boolean).join(', '); }
+  function psqAddress() { var a = psqVal('psq-address'), z = psqVal('psq-zip'); return a ? a + (z ? ', AZ ' + z : '') : (z ? 'ZIP ' + z : ''); }
 
   function psqPayload(stage) {
-    var c = psq.contact || {}, p = psq.picks, done = stage === 'complete', win = psqHasWin();
-    var name = (c.first_name + ' ' + c.last_name).trim();
+    var p = psq.picks, name = psqVal('psq-name'), d = psqDigits(psqVal('psq-phone')), phone = d.length === 10 ? psqFmtPhone(d) : psqVal('psq-phone');
+    var full = psqAddress(), services = (p.services || []).join(', ');
     var data = {
-      _subject: done
-        ? '✅ QUOTE CALL: ' + name + ' · ' + psqVal('psq-city') + ' · ' + p.services.join(' + ') + (win && p.plan ? ' · ' + p.plan : '')
-        : '🔥 NEW LEAD — call now: ' + name + ' · ' + c.phone,
-      lead_status: done ? 'Finished the quote — call with their price' : 'Started the quote (details to follow)',
-      name: name, phone: c.phone, email: c.email || '', texts_ok: c.texts_ok || ''
+      _subject: stage === 'complete'
+        ? '✅ QUOTE CALL: ' + name + ' · ' + (psqVal('psq-zip') || '') + ' · ' + (p.services || []).map(function (s) { return PSQ_SHORT[s] || s; }).join(' + ')
+        : '🔥 PARTIAL LEAD — call now: ' + (name || 'No name yet') + ' · ' + phone,
+      lead_status: stage === 'complete' ? 'Finished — call with their price' : 'Typed their number but didn’t finish — call them',
+      name: name, phone: phone, address: full,
+      google_maps: full ? 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(full) : '',
+      services: services, property: p.place || '', stories: p.stories || '',
+      window_cleaning_type: p.wintype || '', membership_interest: p.plan || '',
+      texts_ok: psqEl('psq-texts').checked ? 'Yes' : 'No',
+      submitted: new Date().toLocaleString('en-US', { timeZone: 'America/Phoenix' }) + ' (Phoenix)'
     };
-    if (done) {
-      var full = psqAddress();
-      data.best_time_to_call = p.time || 'Anytime';
-      data.address = full;
-      data.google_maps = 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(full);
-      data.services = p.services.join(', ');
-      data.property_type = p.type || '';
-      data.home_size = p.size || '';
-      if (win) {
-        data.window_cleaning = p.wintype || '';
-        data.window_panes_estimate = p.size && PSQ_PANES[p.size] ? 'About ' + PSQ_PANES[p.size] : 'Not sure';
-        data.french_panes = p.panes || '';
-        data.hard_water_spots = p.hard || 'Not given';
-        data.last_cleaned = p.last || 'Not given';
-      }
-      PSQ_DETAILS.forEach(function (d) {
-        if (p.services.indexOf(d[0]) < 0) return;
-        var v = p[d[1]]; v = Array.isArray(v) ? v.join(', ') : v;
-        data[d[2].toLowerCase().replace(/ /g, '_')] = v || 'No details given';
-      });
-      if (win) data.membership = PSQ_PLAN[p.plan] || 'Not sure yet';
-      data.heard_about_us = psqVal('psq-hear');
-      data.referral_or_promo_code = psqVal('psq-code');
-    }
-    data.submitted = new Date().toLocaleString('en-US', { timeZone: 'America/Phoenix' }) + ' (Phoenix)';
     return data;
   }
 
@@ -4174,26 +4171,37 @@
     Object.keys(data).forEach(function (k) { if (data[k] !== '') fd.append(k, data[k]); });
     fd.append('_template', 'table');
     fd.append('_captcha', 'false');
-    return fetch('https://formsubmit.co/ajax/' + PSQ_EMAIL, { method: 'POST', headers: { 'Accept': 'application/json' }, body: fd })
+    return fetch('https://formsubmit.co/ajax/' + PSQ_EMAIL, { method: 'POST', headers: { 'Accept': 'application/json' }, body: fd, keepalive: true })
       .then(function (r) { if (!r.ok) throw new Error('relay ' + r.status); return r.json(); });
   }
 
+  // They typed a real phone number but left without finishing: still send it so Prime Shine can call
+  function psqPartial() {
+    if (psq.submitted || psq.partialSent || psqDigits(psqVal('psq-phone')).length !== 10) return;
+    psq.partialSent = true;
+    psqSend('partial').catch(function () {});
+  }
+  window.addEventListener('pagehide', psqPartial);
+
   function psqSubmit() {
     if (!psqCheck([
-      ['psq-address', function (v) { return v.length > 3; }, 'Enter your street address.'],
-      ['psq-city', function (v) { return v.length > 1; }, 'Enter your city.'],
-      ['psq-zip', function (v) { return /^\d{5}$/.test(v); }, 'Enter a 5-digit zip code.']
-    ], 'address')) return;
+      ['psq-name', function (v) { return v.length > 1; }, 'Enter your name.'],
+      ['psq-phone', function (v) { return psqDigits(v).length === 10; }, 'Enter a 10-digit mobile number so we can call you.'],
+      ['psq-address', function (v) { return v.length > 4; }, 'Enter the street address.'],
+      ['psq-zip', function (v) { return /^\d{5}$/.test(v); }, 'Enter a 5-digit ZIP code.']
+    ], 'contact')) return;
     var btn = psqEl('psq-next'), label = psqEl('psq-next-label');
     btn.disabled = true; label.textContent = 'Sending…';
     psqSend('complete').then(function () {
+      psq.submitted = true;
+      psq.contact = { first_name: psqVal('psq-name').split(' ')[0], name: psqVal('psq-name'), phone: psqFmtPhone(psqDigits(psqVal('psq-phone'))) };
       btn.disabled = false;
       psqEl('psq-h-done').textContent = 'You’re all set, ' + psq.contact.first_name + '!';
       psqEl('psq-done-msg').innerHTML = psqDoneMessage();
       psqGo('done');
     }).catch(function () {
-      btn.disabled = false; label.textContent = 'Request my quote call';
-      psqErr('address', 'We couldn’t send your request. Please call or text us at ' + PSQ_PHONE + '.');
+      btn.disabled = false; label.textContent = 'Get my free quote';
+      psqErr('contact', 'We couldn’t send your request. Please call or text us at ' + PSQ_PHONE + '.');
     });
   }
 
@@ -4273,9 +4281,9 @@
     if (!psqPhotoCount() || !psq.contact) return;
     var btn = psqEl('psq-photo-send');
     btn.disabled = true; btn.textContent = 'Sending…';
-    var c = psq.contact, name = (c.first_name + ' ' + c.last_name).trim();
+    var c = psq.contact, name = c.name;
     var data = {
-      _subject: '📷 PHOTOS: ' + name + ' · ' + psqVal('psq-city') + ' · ' + c.phone,
+      _subject: '📷 PHOTOS: ' + name + ' · ' + psqVal('psq-zip') + ' · ' + c.phone,
       name: name, phone: c.phone, address: psqAddress(),
       photos: psq.photos.map(function (ph, i) { return ph && ph.blob ? PSQ_PHOTO_LABELS[i] : null; }).filter(Boolean).join(', ')
     };
@@ -4313,8 +4321,6 @@
     f.submit();
   }
 
-  psqSummary();
-  psqStepper();
 </script>
 <script>
   /* ── Mobile Menu ─────────────────────────────────────────── */
